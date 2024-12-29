@@ -72,7 +72,7 @@ const About = () => {
               <div className="relative w-full max-w-lg mx-auto">
                 <div className="absolute -inset-0.5 bg-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
                 <img
-                  src="/images/profile.jpg"
+                  src="/portfolio_updated/images/profile.jpg"
                   alt="Vinay Naik V"
                   className="relative rounded-lg w-full filter grayscale hover:grayscale-0 transition duration-300"
                 />
