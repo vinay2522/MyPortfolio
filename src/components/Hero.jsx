@@ -55,7 +55,7 @@ const Hero = () => {
             </Link>
             
             <a
-              href="/images/resume.pdf"
+              href="/portfolio_updated/images/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary w-full sm:w-auto text-center hover:bg-secondary/20"
