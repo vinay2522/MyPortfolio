@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-scroll';
 import { HiMenu, HiX } from 'react-icons/hi';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [adminClickCount, setAdminClickCount] = useState(0);
+  const [showAdminButton, setShowAdminButton] = useState(false);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,6 +50,32 @@ const Navbar = () => {
     };
   }, [isOpen]);
 
+  // Reset admin click count after delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAdminClickCount(0);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [adminClickCount]);
+
+  const handleLogoClick = () => {
+    setAdminClickCount(prev => {
+      const newCount = prev + 1;
+      if (newCount === 3) {
+        setShowAdminButton(true);
+        setTimeout(() => setShowAdminButton(false), 3000);
+        return 0;
+      }
+      return newCount;
+    });
+  };
+
+  const handleAdminAccess = () => {
+    navigate('/admin');
+    setShowAdminButton(false);
+  };
+
   const navLinks = [
     { name: 'Home', to: 'home' },
     { name: 'About', to: 'about' },
@@ -63,14 +93,25 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link
-            to="home"
-            smooth={true}
-            duration={500}
-            className="text-4xl font-bold text-secondary cursor-pointer hover:scale-110 transition-transform"
-          >
-            VNV
-          </Link>
+          <div className="relative">
+            <Link
+              to="home"
+              smooth={true}
+              duration={500}
+              className="text-4xl font-bold text-secondary cursor-pointer hover:scale-110 transition-transform"
+              onClick={handleLogoClick}
+            >
+              VNV
+            </Link>
+            {showAdminButton && (
+              <button
+                onClick={handleAdminAccess}
+                className="absolute top-full left-0 mt-2 bg-gradient-to-r from-secondary to-primary text-white px-4 py-2 rounded-md hover:scale-105 duration-300 shadow-lg text-sm"
+              >
+                Admin Access
+              </button>
+            )}
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">

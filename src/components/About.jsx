@@ -36,7 +36,7 @@ const About = () => {
               <p>Here are a few technologies I've been working with recently:</p>
             </div>
 
-            <ul className="grid grid-cols-2 gap-2 mt-6">
+            <ul className="grid grid-cols-2 gap-2 mt-6 text-textSecondary">
               <li className="flex items-center">
                 <span className="text-secondary mr-2">▹</span> React.js
               </li>
@@ -72,9 +72,10 @@ const About = () => {
               <div className="relative w-full max-w-lg mx-auto">
                 <div className="absolute -inset-0.5 bg-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
                 <img
-                  src="/portfolio_updated/images/profile.jpg"
+                  src="/images/profile.jpg"
                   alt="Vinay Naik V"
-                  className="relative rounded-lg w-full filter grayscale hover:grayscale-0 transition duration-300"
+                  className="relative rounded-lg w-full filter grayscale hover:grayscale-0 transition duration-300 shadow-xl"
+                  loading="lazy"
                 />
               </div>
             </motion.div>
