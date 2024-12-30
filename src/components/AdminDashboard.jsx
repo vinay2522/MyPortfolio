@@ -4,7 +4,7 @@ import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../config/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { FaUserShield, FaEnvelope, FaLock, FaSignOutAlt, FaEye } from 'react-icons/fa';
+import { FaUserShield, FaEnvelope, FaLock, FaSignOutAlt, FaEye, FaGlobe, FaMobile, FaDesktop } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +13,14 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [visitors, setVisitors] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    today: 0,
+    devices: { Mobile: 0, Desktop: 0, Tablet: 0 },
+    browsers: {},
+    countries: {},
+    referrers: {}
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +45,42 @@ const AdminDashboard = () => {
         timestamp: doc.data().timestamp?.toDate()
       }));
       setVisitors(visitorData);
+
+      // Calculate statistics
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const newStats = {
+        total: visitorData.length,
+        today: visitorData.filter(v => v.timestamp >= today).length,
+        devices: { Mobile: 0, Desktop: 0, Tablet: 0 },
+        browsers: {},
+        countries: {},
+        referrers: {}
+      };
+
+      visitorData.forEach(visitor => {
+        // Count devices
+        if (visitor.device?.type) {
+          newStats.devices[visitor.device.type] = (newStats.devices[visitor.device.type] || 0) + 1;
+        }
+
+        // Count browsers
+        if (visitor.device?.browser) {
+          newStats.browsers[visitor.device.browser] = (newStats.browsers[visitor.device.browser] || 0) + 1;
+        }
+
+        // Count countries
+        if (visitor.location?.country) {
+          newStats.countries[visitor.location.country] = (newStats.countries[visitor.location.country] || 0) + 1;
+        }
+
+        // Count referrers
+        const referrer = visitor.referrer || 'Direct';
+        newStats.referrers[referrer] = (newStats.referrers[referrer] || 0) + 1;
+      });
+
+      setStats(newStats);
     } catch (error) {
       console.error('Error fetching visitors:', error);
     }
@@ -133,7 +177,7 @@ const AdminDashboard = () => {
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center">
             <FaEye className="text-4xl text-cyan-500 mr-4" />
-            <h1 className="text-4xl font-bold text-white">Visitor Statistics</h1>
+            <h1 className="text-4xl font-bold text-white">Portfolio Analytics</h1>
           </div>
           <button
             onClick={handleLogout}
@@ -144,27 +188,97 @@ const AdminDashboard = () => {
           </button>
         </div>
 
+        {/* Overview Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-b from-gray-800 to-black rounded-lg shadow-xl border border-gray-700 p-6">
+            <h3 className="text-lg font-semibold mb-2 text-cyan-500">Total Visits</h3>
+            <p className="text-3xl font-bold">{stats.total}</p>
+          </div>
+          <div className="bg-gradient-to-b from-gray-800 to-black rounded-lg shadow-xl border border-gray-700 p-6">
+            <h3 className="text-lg font-semibold mb-2 text-cyan-500">Today's Visits</h3>
+            <p className="text-3xl font-bold">{stats.today}</p>
+          </div>
+          <div className="bg-gradient-to-b from-gray-800 to-black rounded-lg shadow-xl border border-gray-700 p-6">
+            <h3 className="text-lg font-semibold mb-2 text-cyan-500">Mobile Users</h3>
+            <p className="text-3xl font-bold">{stats.devices.Mobile || 0}</p>
+          </div>
+          <div className="bg-gradient-to-b from-gray-800 to-black rounded-lg shadow-xl border border-gray-700 p-6">
+            <h3 className="text-lg font-semibold mb-2 text-cyan-500">Desktop Users</h3>
+            <p className="text-3xl font-bold">{stats.devices.Desktop || 0}</p>
+          </div>
+        </div>
+
+        {/* Detailed Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Countries */}
+          <div className="bg-gradient-to-b from-gray-800 to-black rounded-lg shadow-xl border border-gray-700 p-6">
+            <h3 className="text-xl font-semibold mb-4 text-cyan-500 flex items-center">
+              <FaGlobe className="mr-2" /> Top Countries
+            </h3>
+            <div className="space-y-3">
+              {Object.entries(stats.countries)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5)
+                .map(([country, count]) => (
+                  <div key={country} className="flex justify-between items-center">
+                    <span>{country}</span>
+                    <span className="text-cyan-500">{count}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* Browsers */}
+          <div className="bg-gradient-to-b from-gray-800 to-black rounded-lg shadow-xl border border-gray-700 p-6">
+            <h3 className="text-xl font-semibold mb-4 text-cyan-500 flex items-center">
+              <FaDesktop className="mr-2" /> Top Browsers
+            </h3>
+            <div className="space-y-3">
+              {Object.entries(stats.browsers)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5)
+                .map(([browser, count]) => (
+                  <div key={browser} className="flex justify-between items-center">
+                    <span>{browser}</span>
+                    <span className="text-cyan-500">{count}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Visits Table */}
         <div className="bg-gradient-to-b from-gray-800 to-black rounded-lg shadow-xl border border-gray-700 p-6">
-          <h2 className="text-2xl font-semibold mb-6 text-cyan-500">
-            Recent Visitors
-          </h2>
+          <h2 className="text-2xl font-semibold mb-6 text-cyan-500">Recent Visitors</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full table-auto">
               <thead>
                 <tr className="bg-gray-800">
                   <th className="px-4 py-3 text-left text-cyan-500">Time</th>
+                  <th className="px-4 py-3 text-left text-cyan-500">Location</th>
+                  <th className="px-4 py-3 text-left text-cyan-500">Device</th>
                   <th className="px-4 py-3 text-left text-cyan-500">Browser</th>
                   <th className="px-4 py-3 text-left text-cyan-500">Referrer</th>
                 </tr>
               </thead>
               <tbody>
-                {visitors.map((visitor) => (
+                {visitors.slice(0, 10).map((visitor) => (
                   <tr key={visitor.id} className="border-b border-gray-700 hover:bg-gray-800/50">
                     <td className="px-4 py-3">
                       {visitor.timestamp?.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3">{visitor.userAgent}</td>
-                    <td className="px-4 py-3">{visitor.referrer || 'Direct'}</td>
+                    <td className="px-4 py-3">
+                      {visitor.location?.city}, {visitor.location?.country}
+                    </td>
+                    <td className="px-4 py-3">
+                      {visitor.device?.type}
+                    </td>
+                    <td className="px-4 py-3">
+                      {visitor.device?.browser}
+                    </td>
+                    <td className="px-4 py-3">
+                      {visitor.referrer || 'Direct'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

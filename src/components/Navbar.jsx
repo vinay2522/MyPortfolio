@@ -74,6 +74,7 @@ const Navbar = () => {
   const handleAdminAccess = () => {
     navigate('/admin');
     setShowAdminButton(false);
+    setIsOpen(false);
   };
 
   const navLinks = [
@@ -83,6 +84,14 @@ const Navbar = () => {
     { name: 'Projects', to: 'projects' },
     { name: 'Contact', to: 'contact' },
   ];
+
+  const getResumeUrl = () => {
+    // Check if we're in development or production
+    const isProduction = window.location.hostname !== 'localhost';
+    return isProduction 
+      ? '/portfolio_updated/images/resume.pdf'
+      : '/images/resume.pdf';
+  };
 
   return (
     <nav
@@ -133,7 +142,7 @@ const Navbar = () => {
               </Link>
             ))}
             <a
-              href="/images/resume.pdf"
+              href={getResumeUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary text-base lg:text-lg"
@@ -182,7 +191,7 @@ const Navbar = () => {
             </Link>
           ))}
           <a
-            href="/images/resume.pdf"
+            href={getResumeUrl()}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary text-xl"

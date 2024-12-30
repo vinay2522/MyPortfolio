@@ -6,7 +6,7 @@ import Skills from './components/Skills'
 import Projects from './components/Projects'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { trackVisit } from './services/visitorService';
 import AdminDashboard from './components/AdminDashboard';
 import AdminSetup from './components/AdminSetup';
@@ -26,8 +26,13 @@ function App() {
       once: true,
       easing: 'ease-out-cubic',
       delay: 50,
-    })
-    trackVisit();
+    });
+
+    // Track visit only if not already tracked in this session
+    if (!sessionStorage.getItem('visitLogged')) {
+      trackVisit();
+      sessionStorage.setItem('visitLogged', 'true');
+    }
   }, [])
 
   return (
@@ -55,7 +60,7 @@ function App() {
         />
       </Routes>
     </Router>
-  )
+  );
 }
 
 export default App
