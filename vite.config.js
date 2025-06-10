@@ -6,6 +6,16 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [react()],
   base: '/MyPortfolio/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
   server: {
     port: 5173,
     host: true,
