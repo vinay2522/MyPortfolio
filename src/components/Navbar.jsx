@@ -8,6 +8,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [adminClickCount, setAdminClickCount] = useState(0);
   const [showAdminButton, setShowAdminButton] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
@@ -18,6 +19,28 @@ const Navbar = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Theme detection
+  useEffect(() => {
+    const checkTheme = () => {
+      const savedTheme = localStorage.getItem('theme');
+      setIsDark(savedTheme === 'dark' || savedTheme === null);
+    };
+
+    checkTheme();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(() => {
+      checkTheme();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   // Close mobile menu when clicking outside
@@ -82,32 +105,47 @@ const Navbar = () => {
     { name: 'About', to: 'about' },
     { name: 'Skills', to: 'skills' },
     { name: 'Projects', to: 'projects' },
+    { name: 'Resume', to: 'resume' },
     { name: 'Contact', to: 'contact' },
   ];
 
   const getResumeUrl = () => {
-    // Check if we're in development or production
-    const isProduction = window.location.hostname !== 'localhost';
-    return isProduction 
-      ? '/portfolio_updated/images/resume.pdf'
-      : '/images/resume.pdf';
+    // Always use the base path for consistency
+    return '/MyPortfolio/images/VINAYNAIKV_RESUME.pdf';
+  };
+
+  const getNavbarStyle = () => {
+    if (!scrolled) return 'py-4 sm:py-6';
+
+    return 'py-3 sm:py-4 shadow-lg backdrop-blur-sm';
+  };
+
+  const getNavbarBg = () => {
+    if (!scrolled) {
+      return {
+        backgroundColor: isDark ? 'rgba(10, 25, 47, 0.8)' : 'rgba(255, 255, 255, 0.8)'
+      };
+    }
+
+    return {
+      backgroundColor: isDark ? 'rgba(10, 25, 47, 0.95)' : 'rgba(255, 255, 255, 0.95)'
+    };
   };
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-primary/95 backdrop-blur-sm py-4 shadow-lg' : 'bg-transparent py-6'
-      }`}
+      className={`fixed w-full z-50 transition-all duration-300 ${getNavbarStyle()}`}
+      style={getNavbarBg()}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
           <div className="relative">
             <Link
               to="home"
               smooth={true}
               duration={500}
-              className="text-4xl font-bold text-secondary cursor-pointer hover:scale-110 transition-transform"
+              className="text-3xl sm:text-4xl font-bold text-secondary cursor-pointer hover:scale-110 transition-transform"
               onClick={handleLogoClick}
             >
               VNV
@@ -115,7 +153,7 @@ const Navbar = () => {
             {showAdminButton && (
               <button
                 onClick={handleAdminAccess}
-                className="absolute top-full left-0 mt-2 bg-gradient-to-r from-secondary to-primary text-white px-4 py-2 rounded-md hover:scale-105 duration-300 shadow-lg text-sm"
+                className="absolute top-full left-0 mt-2 bg-gradient-to-r from-secondary to-primary text-white px-4 py-2 rounded-md hover:scale-105 duration-300 shadow-lg text-sm z-50"
               >
                 Admin Access
               </button>
@@ -123,7 +161,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -132,7 +170,7 @@ const Navbar = () => {
                 duration={500}
                 spy={true}
                 activeClass="active"
-                className="nav-link text-base lg:text-lg relative group py-2"
+                className="nav-link text-sm lg:text-base xl:text-lg relative group py-2 px-2 cursor-pointer"
                 offset={-70}
               >
                 <span className="relative">
@@ -141,41 +179,51 @@ const Navbar = () => {
                 </span>
               </Link>
             ))}
-            <a
-              href={getResumeUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary text-base lg:text-lg"
-            >
-              Resume
-            </a>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            ref={menuRef}
-            className="md:hidden text-textSecondary hover:text-secondary transition-colors duration-300 p-2 z-50"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? 'Close menu' : 'Open menu'}
-          >
-            {isOpen ? (
-              <HiX className="h-8 w-8" />
-            ) : (
-              <HiMenu className="h-8 w-8" />
-            )}
-          </button>
+          <div className="md:hidden mobile-menu-button">
+            <button
+              className="text-textSecondary hover:text-secondary transition-colors duration-300 p-2 z-[60] touch-target relative flex items-center justify-center border border-textSecondary/20 rounded-md"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Close menu' : 'Open menu'}
+              style={{
+                minWidth: '44px',
+                minHeight: '44px',
+                color: isDark ? '#8892B0' : '#0A192F',
+                backgroundColor: isDark ? 'rgba(17, 34, 64, 0.8)' : 'rgba(255, 255, 255, 0.8)'
+              }}
+            >
+              {isOpen ? (
+                <HiX className="h-6 w-6 sm:h-7 sm:w-7" />
+              ) : (
+                <HiMenu className="h-6 w-6 sm:h-7 sm:w-7" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mobile Navigation Menu */}
       <div
-        className={`fixed inset-0 bg-primary/98 backdrop-blur-lg transition-transform duration-300 ease-in-out md:hidden ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed inset-0 backdrop-blur-lg transition-all duration-300 ease-in-out md:hidden z-50 ${
+          isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
-        ref={menuRef}
+        style={{
+          backgroundColor: isDark ? 'rgba(10, 25, 47, 0.98)' : 'rgba(255, 255, 255, 0.98)'
+        }}
       >
-        <div className="flex flex-col items-center justify-center min-h-screen space-y-8 p-4">
-          {navLinks.map((link) => (
+        {/* Close button */}
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 text-textSecondary hover:text-secondary transition-colors duration-300 p-2 z-[60] touch-target"
+          aria-label="Close menu"
+        >
+          <HiX className="h-6 w-6 sm:h-7 sm:w-7" />
+        </button>
+
+        <div className="flex flex-col items-center justify-center min-h-screen space-y-6 sm:space-y-8 p-4">
+          {navLinks.map((link, index) => (
             <Link
               key={link.name}
               to={link.to}
@@ -183,22 +231,16 @@ const Navbar = () => {
               duration={500}
               spy={true}
               activeClass="active"
-              className="nav-link text-2xl font-semibold hover:text-secondary transition-colors duration-300"
+              className="nav-link text-xl sm:text-2xl font-semibold hover:text-secondary transition-all duration-300 touch-target flex items-center justify-center py-3 px-6 rounded-lg hover:bg-secondary/10"
               onClick={() => setIsOpen(false)}
               offset={-70}
+              style={{
+                animationDelay: isOpen ? `${index * 0.1}s` : '0s'
+              }}
             >
               {link.name}
             </Link>
           ))}
-          <a
-            href={getResumeUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary text-xl"
-            onClick={() => setIsOpen(false)}
-          >
-            Resume
-          </a>
         </div>
       </div>
     </nav>

@@ -5,13 +5,59 @@
 @tailwind utilities;
 
 :root {
+  --primary: #0A192F;
+  --secondary: #64FFDA;
+  --tertiary: #112240;
+  --text-primary: #CCD6F6;
+  --text-secondary: #8892B0;
   color-scheme: dark;
+}
+
+.light {
+  --primary: #FFFFFF;
+  --secondary: #0A192F;
+  --tertiary: #F8F9FA;
+  --text-primary: #2D3748;
+  --text-secondary: #4A5568;
+  color-scheme: light;
+}
+
+/* Dynamic background colors */
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-secondary {
+  background-color: var(--secondary);
+}
+
+.bg-tertiary {
+  background-color: var(--tertiary);
+}
+
+.text-textPrimary {
+  color: var(--text-primary);
+}
+
+.text-textSecondary {
+  color: var(--text-secondary);
+}
+
+.text-secondary {
+  color: var(--secondary);
+}
+
+.border-secondary {
+  border-color: var(--secondary);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer base {
@@ -21,8 +67,10 @@ body {
   }
   
   body {
-    @apply bg-primary text-textPrimary;
+    background-color: var(--primary);
+    color: var(--text-primary);
     font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
@@ -32,9 +80,23 @@ body {
   }
 
   .btn-primary {
-    @apply px-4 md:px-6 py-2 md:py-3 font-mono text-sm md:text-base border border-secondary 
-    text-secondary rounded hover:bg-secondary/10 transition-all duration-300 
-    focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary;
+    padding: 0.5rem 1.5rem;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.875rem;
+    border: 1px solid var(--secondary);
+    color: var(--secondary);
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    background-color: transparent;
+  }
+
+  .btn-primary:hover {
+    background-color: rgba(100, 255, 218, 0.1);
+  }
+
+  .btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--secondary);
   }
 
   .nav-link {
@@ -75,6 +137,32 @@ body {
 
 .mobile-menu.closed {
   transform: scaleY(0);
+}
+
+/* Ensure mobile navigation is always visible when open */
+.mobile-nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+}
+
+/* Mobile navigation link animations */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-nav-link {
+  animation: slideInFromTop 0.3s ease-out forwards;
 }
 
 /* Hover Effects */
@@ -125,6 +213,41 @@ body {
   @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
+/* Mobile Responsive Utilities */
+.mobile-padding {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.mobile-text {
+  @apply text-sm sm:text-base;
+}
+
+.mobile-heading {
+  @apply text-lg sm:text-xl md:text-2xl;
+}
+
+.mobile-button {
+  @apply px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base;
+}
+
+.mobile-grid {
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.mobile-gap {
+  @apply gap-4 sm:gap-6 lg:gap-8;
+}
+
+/* Touch-friendly interactive elements */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Prevent horizontal scroll on mobile */
+.prevent-scroll {
+  @apply overflow-x-hidden;
+}
+
 /* Animation Classes */
 .fade-up {
   animation: fadeUp 0.5s ease-out forwards;
@@ -159,4 +282,77 @@ body {
 .responsive-grid {
   @apply grid gap-4;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  .section-title {
+    @apply text-xl mb-6;
+  }
+
+  .mobile-menu {
+    @apply text-lg;
+  }
+
+  /* Ensure proper spacing on very small screens */
+  .container {
+    @apply px-3;
+  }
+
+  /* Improve button sizes for touch */
+  .btn-primary {
+    @apply min-h-[44px] px-4 py-3;
+  }
+
+  /* Ensure navbar is always visible on mobile */
+  nav {
+    @apply min-h-[64px];
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Mobile hamburger menu visibility */
+  .mobile-menu-button {
+    @apply block;
+    z-index: 60;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Force navbar container to be visible */
+  nav > div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 64px !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 475px) {
+  .section-title {
+    @apply text-lg mb-4;
+  }
+
+  /* Reduce padding on very small screens */
+  .mobile-padding {
+    @apply px-3;
+  }
+
+  /* Force navbar visibility on very small screens */
+  nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 50 !important;
+    display: block !important;
+  }
+
+  /* Ensure mobile menu button is always visible */
+  .mobile-menu-button {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
 }

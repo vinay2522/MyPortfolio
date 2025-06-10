@@ -42,11 +42,8 @@ const Footer = () => {
               </a>
             ))}
           </div>
-          <p className="text-textSecondary text-sm font-mono">
-            Built with React & Tailwind CSS
-          </p>
           <p className="text-textSecondary text-sm">
-            2024 Vinay Naik V. All Rights Reserved.
+            © 2024 Vinay Naik V. All Rights Reserved.
           </p>
         </div>
       </div>

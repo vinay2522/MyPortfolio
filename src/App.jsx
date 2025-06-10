@@ -4,12 +4,18 @@ import Hero from './components/Hero'
 import About from './components/About'
 import Skills from './components/Skills'
 import Projects from './components/Projects'
+import Achievements from './components/Achievements'
+import Resume from './components/Resume'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import ThemeToggle from './components/ThemeToggle'
+import ScrollProgress from './components/ScrollProgress'
+import ParticleBackground from './components/ParticleBackground'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { trackVisit } from './services/visitorService';
 import AdminDashboard from './components/AdminDashboard';
 import AdminSetup from './components/AdminSetup';
+
 
 // Import AOS
 import AOS from 'aos'
@@ -44,13 +50,18 @@ function App() {
           path="/"
           element={
             <>
+              <ParticleBackground />
+              <ScrollProgress />
+              <ThemeToggle />
               <Navbar />
-              <div className="min-h-screen bg-primary">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="min-h-screen bg-primary relative z-10">
+                <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
                   <Hero />
                   <About />
                   <Skills />
                   <Projects />
+                  <Achievements />
+                  <Resume />
                   <Contact />
                 </div>
                 <Footer />
