@@ -147,6 +147,185 @@ const certifications = [
   { name: "Java Programming Masterclass", issuer: "Udemy" },
 ];
 
+const blogPosts = [
+  {
+    id: 1,
+    title: "Building Secure Blockchain Applications",
+    excerpt: "A deep dive into implementing secure evidence chains using Ethereum, Solidity, and IPFS with proper encryption practices.",
+    date: "Nov 2024",
+    readTime: "8 min read",
+    category: "Blockchain",
+    gradient: "from-violet-500 to-purple-600",
+  },
+  {
+    id: 2,
+    title: "ML-Driven Emergency Response Systems",
+    excerpt: "How machine learning can optimize ambulance dispatch and reduce emergency response times by over 60%.",
+    date: "Oct 2024",
+    readTime: "6 min read",
+    category: "AI/ML",
+    gradient: "from-cyan-500 to-blue-600",
+  },
+  {
+    id: 3,
+    title: "Security Testing Best Practices",
+    excerpt: "Lessons learned from Nokia: vulnerability analysis, penetration testing, and compliance verification workflows.",
+    date: "Sep 2024",
+    readTime: "10 min read",
+    category: "Security",
+    gradient: "from-emerald-500 to-green-600",
+  },
+];
+
+const testimonials = [
+  {
+    id: 1,
+    name: "Security Team Lead",
+    role: "Nokia, Bangalore",
+    content: "Vinay demonstrated exceptional problem-solving skills and a strong understanding of security principles during his internship. His work on vulnerability analysis was thorough and professional.",
+    avatar: "N",
+  },
+  {
+    id: 2,
+    name: "Prof. Mentor",
+    role: "SIT, Tumkur",
+    content: "One of the most dedicated students I've mentored. His blockchain project showed innovative thinking and strong technical execution. Always eager to learn and tackle complex challenges.",
+    avatar: "P",
+  },
+  {
+    id: 3,
+    name: "Hackathon Judge",
+    role: "Hack Kshetra 2024",
+    content: "The Secured Evidence Chain project stood out for its practical application of blockchain technology. Impressive integration of multiple technologies and clear understanding of security requirements.",
+    avatar: "H",
+  },
+];
+
+const codeSnippets = [
+  {
+    id: 1,
+    title: "Smart Contract - Evidence Chain",
+    language: "solidity",
+    code: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract EvidenceChain {
+    struct Evidence {
+        bytes32 hash;
+        address owner;
+        uint256 timestamp;
+        bool verified;
+    }
+    
+    mapping(uint256 => Evidence) public evidences;
+    uint256 public evidenceCount;
+    
+    event EvidenceAdded(
+        uint256 id, 
+        bytes32 hash, 
+        address owner
+    );
+    
+    function addEvidence(bytes32 _hash) 
+        public returns (uint256) 
+    {
+        evidenceCount++;
+        evidences[evidenceCount] = Evidence({
+            hash: _hash,
+            owner: msg.sender,
+            timestamp: block.timestamp,
+            verified: true
+        });
+        emit EvidenceAdded(
+            evidenceCount, 
+            _hash, 
+            msg.sender
+        );
+        return evidenceCount;
+    }
+}`,
+    description: "Smart contract for immutable evidence storage",
+  },
+  {
+    id: 2,
+    title: "ML Prediction Model",
+    language: "python",
+    code: `import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
+
+class AmbulancePredictor:
+    def __init__(self):
+        self.model = RandomForestRegressor(
+            n_estimators=100,
+            max_depth=10,
+            random_state=42
+        )
+        self.scaler = StandardScaler()
+    
+    def preprocess(self, data):
+        features = [
+            'hour', 'day_of_week',
+            'population_density',
+            'historical_demand',
+            'weather_severity'
+        ]
+        return self.scaler.fit_transform(
+            data[features]
+        )
+    
+    def predict_demand(self, X):
+        X_scaled = self.preprocess(X)
+        return self.model.predict(X_scaled)
+    
+    def optimize_dispatch(self, demand):
+        # Allocation algorithm
+        return np.argsort(demand)[::-1]`,
+    description: "ML model for ambulance demand forecasting",
+  },
+  {
+    id: 3,
+    title: "AWS Lambda Handler",
+    language: "javascript",
+    code: `const AWS = require('aws-sdk');
+const dynamoDB = new AWS.DynamoDB
+    .DocumentClient();
+const crypto = require('crypto');
+
+exports.handler = async (event) => {
+    const { url } = JSON.parse(event.body);
+    
+    // Generate short code
+    const shortCode = crypto
+        .randomBytes(4)
+        .toString('base64url');
+    
+    // Store in DynamoDB
+    await dynamoDB.put({
+        TableName: 'URLShortener',
+        Item: {
+            shortCode,
+            originalUrl: url,
+            createdAt: Date.now(),
+            clicks: 0
+        }
+    }).promise();
+    
+    return {
+        statusCode: 200,
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify({
+            shortUrl: \`https://short.ly/\${shortCode}\`
+        })
+    };
+};`,
+    description: "Serverless URL shortener with DynamoDB",
+  },
+];
+
 function TypewriterText({ text, className = "" }: { text: string; className?: string }) {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -220,7 +399,8 @@ function Navigation() {
     { name: "Projects", href: "#projects" },
     { name: "Skills", href: "#skills" },
     { name: "Experience", href: "#experience" },
-    { name: "Education", href: "#education" },
+    { name: "Blog", href: "#blog" },
+    { name: "Code", href: "#code" },
     { name: "Contact", href: "#contact" },
   ];
 
@@ -759,9 +939,202 @@ function AchievementsSection() {
   );
 }
 
+function BlogSection() {
+  return (
+    <section id="blog" className="py-20 sm:py-32 bg-card/50" data-testid="blog-section">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">
+              Technical <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-500">Articles</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Deep dives into my projects and technical explorations
+            </p>
+          </div>
+        </ScrollReveal>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {blogPosts.map((post, index) => (
+            <ScrollReveal key={post.id} delay={index * 100}>
+              <Card className="group h-full bg-card border-border hover:border-violet-500/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                <div className={`h-2 bg-gradient-to-r ${post.gradient}`} />
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs font-mono border-border">
+                      {post.category}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">{post.readTime}</span>
+                  </div>
+                  
+                  <h3 className="font-display font-semibold group-hover:text-violet-400 transition-colors">
+                    {post.title}
+                  </h3>
+                  
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {post.excerpt}
+                  </p>
+                  
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-xs text-muted-foreground">{post.date}</span>
+                    <span className="text-sm text-cyan-400 group-hover:text-cyan-300 transition-colors flex items-center gap-1">
+                      Read more
+                      <ExternalLink className="h-3 w-3" />
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            </ScrollReveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TestimonialsSection() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <section className="py-20 sm:py-32" data-testid="testimonials-section">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">
+              What People <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-500">Say</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Feedback from mentors, colleagues, and collaborators
+            </p>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal delay={200}>
+          <div className="max-w-3xl mx-auto">
+            <Card className="p-8 bg-card border-border relative overflow-hidden">
+              <Quote className="absolute top-4 right-4 h-16 w-16 text-violet-500/10" />
+              
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white">
+                    {testimonials[activeIndex].avatar}
+                  </div>
+                  <div>
+                    <h4 className="font-display font-semibold">{testimonials[activeIndex].name}</h4>
+                    <p className="text-sm text-muted-foreground">{testimonials[activeIndex].role}</p>
+                  </div>
+                </div>
+                
+                <p className="text-muted-foreground leading-relaxed italic min-h-[80px]">
+                  "{testimonials[activeIndex].content}"
+                </p>
+                
+                <div className="flex justify-center gap-2 pt-4">
+                  {testimonials.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === activeIndex 
+                          ? "w-6 bg-gradient-to-r from-violet-500 to-purple-600" 
+                          : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                      }`}
+                      data-testid={`testimonial-dot-${index}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+}
+
+function CodeSnippetsSection() {
+  const [activeSnippet, setActiveSnippet] = useState(0);
+
+  return (
+    <section id="code" className="py-20 sm:py-32 bg-card/50" data-testid="code-section">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">
+              Code <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-500">Showcase</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Sample code from my projects demonstrating different technologies
+            </p>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal delay={100}>
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            {codeSnippets.map((snippet, index) => (
+              <Button
+                key={snippet.id}
+                variant={activeSnippet === index ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveSnippet(index)}
+                className={activeSnippet === index 
+                  ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0" 
+                  : "border-border hover:border-violet-500/50"}
+                data-testid={`snippet-tab-${index}`}
+              >
+                <Terminal className="mr-2 h-4 w-4" />
+                {snippet.language.charAt(0).toUpperCase() + snippet.language.slice(1)}
+              </Button>
+            ))}
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal delay={200}>
+          <div className="max-w-4xl mx-auto">
+            <Card className="overflow-hidden bg-[#1a1b26] border-border">
+              <div className="flex items-center justify-between px-4 py-3 bg-[#16161e] border-b border-border">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                </div>
+                <span className="text-sm font-mono text-muted-foreground">
+                  {codeSnippets[activeSnippet].title}
+                </span>
+                <Badge variant="outline" className="text-xs font-mono border-border">
+                  {codeSnippets[activeSnippet].language}
+                </Badge>
+              </div>
+              <div className="p-4 overflow-x-auto">
+                <pre className="text-sm font-mono leading-relaxed">
+                  <code className="text-gray-300">
+                    {codeSnippets[activeSnippet].code}
+                  </code>
+                </pre>
+              </div>
+              <div className="px-4 py-3 bg-[#16161e] border-t border-border">
+                <p className="text-sm text-muted-foreground">
+                  {codeSnippets[activeSnippet].description}
+                </p>
+              </div>
+            </Card>
+          </div>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+}
+
 function ContactSection() {
   return (
-    <section id="contact" className="py-20 sm:py-32 bg-card/50" data-testid="contact-section">
+    <section id="contact" className="py-20 sm:py-32" data-testid="contact-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
@@ -890,6 +1263,9 @@ export default function Portfolio() {
         <ExperienceSection />
         <EducationSection />
         <AchievementsSection />
+        <BlogSection />
+        <TestimonialsSection />
+        <CodeSnippetsSection />
         <ContactSection />
       </main>
       <Footer />
