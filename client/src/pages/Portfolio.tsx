@@ -26,7 +26,11 @@ import {
   Server,
   Shield,
   Menu,
-  X
+  X,
+  Download,
+  FileText,
+  Quote,
+  Terminal
 } from "lucide-react";
 const vinayPhoto = "/vinay-photo.jpg";
 
@@ -39,6 +43,7 @@ const projects = [
     github: "https://github.com/vinay2522/Hackcult",
     icon: Lock,
     gradient: "from-violet-500 to-purple-600",
+    category: "Blockchain",
   },
   {
     id: 2,
@@ -48,6 +53,7 @@ const projects = [
     github: "https://github.com/vinay2522/Temp-mini_project",
     icon: Ambulance,
     gradient: "from-cyan-500 to-blue-600",
+    category: "AI/ML",
   },
   {
     id: 3,
@@ -57,6 +63,7 @@ const projects = [
     github: "https://github.com/vinay2522/plant_disease",
     icon: Leaf,
     gradient: "from-emerald-500 to-green-600",
+    category: "AI/ML",
   },
   {
     id: 4,
@@ -66,8 +73,11 @@ const projects = [
     github: "#",
     icon: Link2,
     gradient: "from-orange-500 to-amber-600",
+    category: "Cloud",
   },
 ];
+
+const projectCategories = ["All", "Blockchain", "AI/ML", "Cloud"];
 
 const skills = {
   languages: ["Java", "C", "JavaScript", "HTML", "CSS", "MySQL", "Python"],
@@ -337,7 +347,7 @@ function HeroSection() {
               Passionate about Blockchain, AI/ML, and building secure, scalable applications.
             </p>
 
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+            <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
               <Button 
                 onClick={scrollToProjects}
                 className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
@@ -354,6 +364,16 @@ function HeroSection() {
               >
                 Contact Me
               </Button>
+              <a href="/vinay-naik-resume.pdf" download="Vinay_Naik_Resume.pdf">
+                <Button 
+                  variant="outline"
+                  className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+                  data-testid="button-download-resume"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Resume
+                </Button>
+              </a>
             </div>
 
             {/* Social Links */}
@@ -418,11 +438,17 @@ function HeroSection() {
 }
 
 function ProjectsSection() {
+  const [activeFilter, setActiveFilter] = useState("All");
+  
+  const filteredProjects = activeFilter === "All" 
+    ? projects 
+    : projects.filter(p => p.category === activeFilter);
+
   return (
     <section id="projects" className="py-20 sm:py-32" data-testid="projects-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">
               Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-500">Projects</span>
             </h2>
@@ -432,14 +458,39 @@ function ProjectsSection() {
           </div>
         </ScrollReveal>
 
+        {/* Filter Buttons */}
+        <ScrollReveal delay={100}>
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {projectCategories.map((category) => (
+              <Button
+                key={category}
+                variant={activeFilter === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveFilter(category)}
+                className={activeFilter === category 
+                  ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0" 
+                  : "border-border hover:border-violet-500/50"}
+                data-testid={`filter-${category.toLowerCase().replace('/', '-')}`}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+        </ScrollReveal>
+
         <div className="grid md:grid-cols-2 gap-6">
-          {projects.map((project, index) => (
+          {filteredProjects.map((project, index) => (
             <ScrollReveal key={project.id} delay={index * 100}>
               <Card className="group relative overflow-visible bg-card border-border hover:border-violet-500/50 transition-all duration-300 hover:-translate-y-1">
                 <div className="p-6 space-y-4">
-                  {/* Project Icon */}
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${project.gradient} flex items-center justify-center`}>
-                    <project.icon className="h-6 w-6 text-white" />
+                  {/* Project Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${project.gradient} flex items-center justify-center flex-shrink-0`}>
+                      <project.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <Badge variant="outline" className="text-xs font-mono border-border">
+                      {project.category}
+                    </Badge>
                   </div>
 
                   {/* Title */}
