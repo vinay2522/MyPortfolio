@@ -29,7 +29,6 @@ import {
   X,
   Download,
   FileText,
-  Quote,
   Terminal
 } from "lucide-react";
 const vinayPhoto = "/vinay-photo.jpg";
@@ -177,29 +176,6 @@ const blogPosts = [
   },
 ];
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Security Team Lead",
-    role: "Nokia, Bangalore",
-    content: "Vinay demonstrated exceptional problem-solving skills and a strong understanding of security principles during his internship. His work on vulnerability analysis was thorough and professional.",
-    avatar: "N",
-  },
-  {
-    id: 2,
-    name: "Prof. Mentor",
-    role: "SIT, Tumkur",
-    content: "One of the most dedicated students I've mentored. His blockchain project showed innovative thinking and strong technical execution. Always eager to learn and tackle complex challenges.",
-    avatar: "P",
-  },
-  {
-    id: 3,
-    name: "Hackathon Judge",
-    role: "Hack Kshetra 2024",
-    content: "The Secured Evidence Chain project stood out for its practical application of blockchain technology. Impressive integration of multiple technologies and clear understanding of security requirements.",
-    avatar: "H",
-  },
-];
 
 const codeSnippets = [
   {
@@ -992,73 +968,6 @@ function BlogSection() {
   );
 }
 
-function TestimonialsSection() {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <section className="py-20 sm:py-32" data-testid="testimonials-section">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">
-              What People <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-500">Say</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Feedback from mentors, colleagues, and collaborators
-            </p>
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={200}>
-          <div className="max-w-3xl mx-auto">
-            <Card className="p-8 bg-card border-border relative overflow-hidden">
-              <Quote className="absolute top-4 right-4 h-16 w-16 text-violet-500/10" />
-              
-              <div className="relative z-10 space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white">
-                    {testimonials[activeIndex].avatar}
-                  </div>
-                  <div>
-                    <h4 className="font-display font-semibold">{testimonials[activeIndex].name}</h4>
-                    <p className="text-sm text-muted-foreground">{testimonials[activeIndex].role}</p>
-                  </div>
-                </div>
-                
-                <p className="text-muted-foreground leading-relaxed italic min-h-[80px]">
-                  "{testimonials[activeIndex].content}"
-                </p>
-                
-                <div className="flex justify-center gap-2 pt-4">
-                  {testimonials.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        index === activeIndex 
-                          ? "w-6 bg-gradient-to-r from-violet-500 to-purple-600" 
-                          : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                      }`}
-                      data-testid={`testimonial-dot-${index}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </Card>
-          </div>
-        </ScrollReveal>
-      </div>
-    </section>
-  );
-}
-
 function CodeSnippetsSection() {
   const [activeSnippet, setActiveSnippet] = useState(0);
 
@@ -1264,7 +1173,6 @@ export default function Portfolio() {
         <EducationSection />
         <AchievementsSection />
         <BlogSection />
-        <TestimonialsSection />
         <CodeSnippetsSection />
         <ContactSection />
       </main>
