@@ -1134,7 +1134,7 @@ function CodeSnippetsSection() {
 
 function ContactSection() {
   return (
-    <section id="contact" className="py-20 sm:py-32" data-testid="contact-section">
+    <section id="contact" className="py-20 sm:py-32 bg-card/50" data-testid="contact-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
