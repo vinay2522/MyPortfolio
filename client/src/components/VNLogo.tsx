@@ -14,28 +14,37 @@ const sizeClasses = {
 export function VNLogo({ size = "md", className = "", animated = true }: VNLogoProps) {
   return (
     <div 
-      className={`${sizeClasses[size]} ${className} ${animated ? "animate-fade-in" : ""}`}
+      className={`${sizeClasses[size]} ${className} ${animated ? "animate-fade-in" : ""} relative group`}
       data-testid="vn-logo"
     >
       <svg
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full"
+        className="w-full h-full drop-shadow-lg transform transition-all duration-500 group-hover:scale-105"
       >
         <defs>
+          {/* Clean primary gradient - cyan to purple */}
           <linearGradient id="vnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#06b6d4" />
             <stop offset="50%" stopColor="#8b5cf6" />
             <stop offset="100%" stopColor="#a855f7" />
           </linearGradient>
-          <linearGradient id="vnGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#a855f7" />
-            <stop offset="50%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#06b6d4" />
-          </linearGradient>
+          
+          {/* Subtle glow effect */}
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          
+          {/* Soft pulse effect */}
+          <filter id="softPulse" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur">
+              <animate attributeName="stdDeviation" values="2;4;2" dur="3s" repeatCount="indefinite" />
+            </feGaussianBlur>
             <feMerge>
               <feMergeNode in="coloredBlur" />
               <feMergeNode in="SourceGraphic" />
@@ -43,47 +52,62 @@ export function VNLogo({ size = "md", className = "", animated = true }: VNLogoP
           </filter>
         </defs>
         
-        {/* Background circle with gradient border */}
+        {/* Single clean outer ring with subtle pulse */}
         <circle
           cx="50"
           cy="50"
-          r="46"
+          r="45"
           fill="none"
           stroke="url(#vnGradient)"
-          strokeWidth="3"
-          filter="url(#glow)"
+          strokeWidth="2"
+          opacity="0.25"
+          filter="url(#softPulse)"
         />
         
-        {/* V letter - stylized */}
-        <path
-          d="M25 25 L40 70 L50 45"
-          stroke="url(#vnGradient)"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          filter="url(#glow)"
-        />
-        
-        {/* N letter - stylized, connected to V */}
-        <path
-          d="M50 45 L50 70 L65 25 L75 70"
-          stroke="url(#vnGradient2)"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          filter="url(#glow)"
-        />
-        
-        {/* Decorative dot */}
+        {/* Main circle - clean border */}
         <circle
           cx="50"
-          cy="80"
+          cy="50"
+          r="42"
+          fill="rgba(6, 182, 212, 0.03)"
+          stroke="url(#vnGradient)"
+          strokeWidth="2.5"
+          filter="url(#glow)"
+        />
+        
+        {/* Clean V letter - elegant and simple */}
+        <path
+          d="M22 22 L35 70 L45 50 L55 70 L68 22"
+          stroke="url(#vnGradient)"
+          strokeWidth="5.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          filter="url(#glow)"
+        />
+        
+        {/* Clean N letter - connected elegantly */}
+        <path
+          d="M45 50 L45 70 L60 35 L75 70"
+          stroke="url(#vnGradient)"
+          strokeWidth="5.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          filter="url(#glow)"
+        />
+        
+        {/* Single elegant accent dot */}
+        <circle
+          cx="50"
+          cy="82"
           r="3"
           fill="url(#vnGradient)"
           filter="url(#glow)"
-        />
+          opacity="0.9"
+        >
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
+        </circle>
       </svg>
     </div>
   );

@@ -4,12 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VNLogo, VNLogoText } from "@/components/VNLogo";
 import { useTheme } from "@/components/ThemeProvider";
+import { ParticleBackground } from "@/components/ParticleBackground";
+import { ScrollProgress } from "@/components/ScrollProgress";
 import { 
   Sun, 
   Moon, 
   Github, 
   Mail, 
-  Phone, 
   MapPin,
   ExternalLink,
   ChevronDown,
@@ -120,7 +121,7 @@ const education = [
     institution: "Chirec Public School",
     degree: "High School (SSLC)",
     location: "Madhugiri, India",
-    period: "Graduated 2020",
+    period: "10th - 2020",
     score: "95.84%",
   },
 ];
@@ -388,50 +389,65 @@ function Navigation() {
     setIsMobileMenuOpen(false);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsMobileMenuOpen(false);
+  };
+
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-background/80 backdrop-blur-lg border-b border-border"
-          : "bg-transparent"
-      }`}
-      data-testid="navigation"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-2">
-            <VNLogo size="sm" />
-            <VNLogoText className="text-xl hidden sm:block" />
-          </div>
+    <>
+      <ScrollProgress />
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-background/80 backdrop-blur-lg border-b border-border"
+            : "bg-transparent"
+        }`}
+        data-testid="navigation"
+      >
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <button
-                key={link.name}
-                onClick={() => scrollToSection(link.href)}
-                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
-                data-testid={`nav-${link.name.toLowerCase()}`}
-              >
-                {link.name}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={toggleTheme}
-              className="relative overflow-visible"
-              data-testid="button-theme-toggle"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <button
+              onClick={scrollToTop}
+              className="flex items-center gap-2 hover:opacity-80 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer group"
+              aria-label="Scroll to top"
             >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 text-yellow-500" />
-              ) : (
-                <Moon className="h-5 w-5 text-violet-500" />
-              )}
-            </Button>
+              <div className="group-hover:rotate-12 transition-transform duration-300">
+                <VNLogo size="sm" />
+              </div>
+              <VNLogoText className="text-xl hidden sm:block group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:via-violet-500 group-hover:to-purple-500 transition-all duration-300" />
+            </button>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-6">
+              {navLinks.map((link) => (
+                <button
+                  key={link.name}
+                  onClick={() => scrollToSection(link.href)}
+                  className="text-muted-foreground hover:text-foreground transition-all duration-300 text-sm font-medium relative group"
+                  data-testid={`nav-${link.name.toLowerCase()}`}
+                >
+                  {link.name}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-violet-500 group-hover:w-full transition-all duration-300" />
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={toggleTheme}
+                className="relative overflow-visible hover:scale-110 active:scale-95 transition-all duration-300 hover:bg-accent/50"
+                data-testid="button-theme-toggle"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-yellow-500 hover:rotate-180 transition-transform duration-500" />
+                ) : (
+                  <Moon className="h-5 w-5 text-violet-500 hover:rotate-180 transition-transform duration-500" />
+                )}
+              </Button>
 
             {/* Mobile Menu Button */}
             <Button
@@ -460,8 +476,9 @@ function Navigation() {
             ))}
           </div>
         )}
-      </div>
-    </nav>
+        </div>
+      </nav>
+    </>
   );
 }
 
@@ -506,15 +523,15 @@ function HeroSection() {
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
               <Button 
                 onClick={scrollToProjects}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/50 active:scale-95 group"
                 data-testid="button-view-projects"
               >
                 View Projects
-                <ChevronDown className="ml-2 h-4 w-4" />
+                <ChevronDown className="ml-2 h-4 w-4 group-hover:translate-y-1 group-hover:animate-bounce transition-transform duration-300" />
               </Button>
               <Button 
                 variant="outline"
-                className="border-border"
+                className="border-border hover:border-violet-500/50 hover:bg-violet-500/10 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-md"
                 onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}
                 data-testid="button-contact-me"
               >
@@ -523,10 +540,10 @@ function HeroSection() {
               <a href="/vinay-naik-resume.pdf" download="Vinay_Naik_Resume.pdf">
                 <Button 
                   variant="outline"
-                  className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+                  className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 transition-all duration-300 hover:scale-105 hover:border-cyan-500 hover:shadow-md hover:shadow-cyan-500/30 active:scale-95 group"
                   data-testid="button-download-resume"
                 >
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className="mr-2 h-4 w-4 group-hover:animate-bounce transition-transform duration-300" />
                   Resume
                 </Button>
               </a>
@@ -544,37 +561,64 @@ function HeroSection() {
                 <Github className="h-5 w-5" />
               </a>
               <a
-                href="mailto:vinay.1si22cs201@gmail.com"
+                href="mailto:vinaynaik252@gmail.com"
                 className="p-2 rounded-full bg-card border border-border hover:border-cyan-500 transition-colors"
                 data-testid="link-email"
               >
                 <Mail className="h-5 w-5" />
               </a>
-              <a
-                href="tel:+918147938224"
-                className="p-2 rounded-full bg-card border border-border hover:border-purple-500 transition-colors"
-                data-testid="link-phone"
-              >
-                <Phone className="h-5 w-5" />
-              </a>
             </div>
           </div>
 
-          {/* Right: Photo */}
+          {/* Right: Photo with 3D Effect */}
           <div className="flex justify-center lg:justify-end">
-            <div className="relative">
-              {/* Gradient border effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-violet-500 to-purple-500 rounded-2xl blur opacity-75 animate-pulse-glow" />
-              <div className="relative">
-                <img
-                  src={vinayPhoto}
-                  alt="Vinay Naik V"
-                  className="w-64 h-80 sm:w-80 sm:h-96 object-cover rounded-2xl border-2 border-border"
-                  data-testid="img-profile"
-                />
+            <div className="relative group" style={{ perspective: "1000px" }}>
+              {/* Enhanced gradient border effect with 3D glow */}
+              <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-violet-500 to-purple-500 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 animate-pulse-glow transition-opacity duration-300" />
+              <div 
+                className="relative transition-all duration-500 group-hover:scale-105 group-hover:-translate-y-2"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <div 
+                  className="relative transition-transform duration-500"
+                  style={{ 
+                    transformStyle: "preserve-3d",
+                  }}
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)";
+                  }}
+                >
+                  <img
+                    src={vinayPhoto}
+                    alt="Vinay Naik V"
+                    className="w-64 h-80 sm:w-80 sm:h-96 object-cover rounded-2xl border-2 border-border shadow-2xl shadow-violet-500/30"
+                    style={{
+                      transform: "translateZ(30px)",
+                      filter: "brightness(1.05) contrast(1.05)",
+                      willChange: "transform"
+                    }}
+                    data-testid="img-profile"
+                  />
+                  {/* 3D depth overlay */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl bg-gradient-to-br from-cyan-500/10 via-transparent to-violet-500/10 pointer-events-none"
+                    style={{ transform: "translateZ(15px)" }}
+                  />
+                </div>
               </div>
-              {/* Floating badge */}
-              <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-lg p-3 shadow-xl animate-float">
+              {/* Enhanced floating badge with 3D effect */}
+              <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-lg p-3 shadow-xl animate-float transition-transform duration-300 group-hover:scale-110 group-hover:rotate-2">
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-cyan-400" />
                   <span className="text-sm font-medium">Nokia Intern</span>
@@ -623,9 +667,11 @@ function ProjectsSection() {
                 variant={activeFilter === category ? "default" : "outline"}
                 size="sm"
                 onClick={() => setActiveFilter(category)}
-                className={activeFilter === category 
-                  ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0" 
-                  : "border-border hover:border-violet-500/50"}
+                className={`transition-all duration-300 ${
+                  activeFilter === category 
+                    ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0 shadow-lg shadow-violet-500/50 hover:shadow-xl hover:shadow-violet-500/60 hover:scale-105" 
+                    : "border-border hover:border-violet-500/50 hover:bg-violet-500/10 hover:scale-105 active:scale-95"
+                }`}
                 data-testid={`filter-${category.toLowerCase().replace('/', '-')}`}
               >
                 {category}
@@ -637,20 +683,23 @@ function ProjectsSection() {
         <div className="grid md:grid-cols-2 gap-6">
           {filteredProjects.map((project, index) => (
             <ScrollReveal key={project.id} delay={index * 100}>
-              <Card className="group relative overflow-visible bg-card border-border hover:border-violet-500/50 transition-all duration-300 hover:-translate-y-1">
-                <div className="p-6 space-y-4">
+              <Card className="group relative overflow-visible bg-card border-border hover:border-violet-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-violet-500/20 cursor-pointer">
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-violet-500 to-purple-500 rounded-lg opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500 -z-10" />
+                
+                <div className="p-6 space-y-4 relative z-10">
                   {/* Project Header */}
                   <div className="flex items-start justify-between gap-3">
-                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${project.gradient} flex items-center justify-center flex-shrink-0`}>
-                      <project.icon className="h-6 w-6 text-white" />
+                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${project.gradient} flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg`}>
+                      <project.icon className="h-6 w-6 text-white group-hover:scale-110 transition-transform duration-300" />
                     </div>
-                    <Badge variant="outline" className="text-xs font-mono border-border">
+                    <Badge variant="outline" className="text-xs font-mono border-border group-hover:border-violet-500/50 group-hover:bg-violet-500/10 transition-all duration-300">
                       {project.category}
                     </Badge>
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl font-display font-semibold group-hover:text-violet-400 transition-colors">
+                  <h3 className="text-xl font-display font-semibold group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-violet-500 transition-all duration-300">
                     {project.title}
                   </h3>
 
@@ -674,12 +723,12 @@ function ProjectsSection() {
                       href={project.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-cyan-400 transition-colors"
+                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-cyan-400 transition-all duration-300 group/link"
                       data-testid={`link-project-${project.id}`}
                     >
-                      <Github className="h-4 w-4" />
+                      <Github className="h-4 w-4 group-hover/link:scale-125 group-hover/link:rotate-12 transition-transform duration-300" />
                       View on GitHub
-                      <ExternalLink className="h-3 w-3" />
+                      <ExternalLink className="h-3 w-3 group-hover/link:translate-x-1 group-hover/link:-translate-y-1 transition-transform duration-300" />
                     </a>
                   </div>
                 </div>
@@ -755,11 +804,11 @@ function ExperienceSection() {
           {experience.map((exp, index) => (
             <ScrollReveal key={index} delay={index * 100}>
               <div className="relative pl-8 pb-8">
-                {/* Timeline line */}
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500 to-violet-500" />
+                {/* Enhanced Timeline line */}
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-500 via-violet-500 to-purple-500 shadow-lg shadow-cyan-500/50" />
                 
-                {/* Timeline dot */}
-                <div className="absolute left-0 top-0 w-2 h-2 -translate-x-[3px] rounded-full bg-cyan-500 ring-4 ring-background" />
+                {/* Enhanced Timeline dot with glow */}
+                <div className="absolute left-0 top-0 w-3 h-3 -translate-x-[5px] rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 ring-4 ring-background shadow-lg shadow-cyan-500/50 animate-pulse-glow" />
                 
                 <Card className="p-6 bg-card border-border hover:border-cyan-500/50 transition-colors">
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
@@ -1061,7 +1110,7 @@ function ContactSection() {
             <Card className="p-8 bg-card border-border">
               <div className="grid sm:grid-cols-2 gap-6">
                 <a
-                  href="mailto:vinay.1si22cs201@gmail.com"
+                  href="mailto:vinaynaik252@gmail.com"
                   className="flex items-center gap-4 p-4 rounded-lg bg-background hover:bg-muted transition-colors group"
                   data-testid="contact-email"
                 >
@@ -1071,23 +1120,7 @@ function ContactSection() {
                   <div>
                     <p className="text-sm text-muted-foreground">Email</p>
                     <p className="font-medium text-sm group-hover:text-cyan-400 transition-colors break-all">
-                      vinay.1si22cs201@gmail.com
-                    </p>
-                  </div>
-                </a>
-
-                <a
-                  href="tel:+918147938224"
-                  className="flex items-center gap-4 p-4 rounded-lg bg-background hover:bg-muted transition-colors group"
-                  data-testid="contact-phone"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="font-medium text-sm group-hover:text-violet-400 transition-colors">
-                      +91-8147938224
+                      vinaynaik252@gmail.com
                     </p>
                   </div>
                 </a>
@@ -1149,7 +1182,7 @@ function Footer() {
               <Github className="h-5 w-5" />
             </a>
             <a
-              href="mailto:vinay.1si22cs201@gmail.com"
+              href="mailto:vinaynaik252@gmail.com"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <Mail className="h-5 w-5" />
@@ -1163,9 +1196,10 @@ function Footer() {
 
 export default function Portfolio() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative">
+      <ParticleBackground />
       <Navigation />
-      <main>
+      <main className="relative z-10">
         <HeroSection />
         <ProjectsSection />
         <SkillsSection />
