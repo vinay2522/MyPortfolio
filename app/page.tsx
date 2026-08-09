@@ -520,7 +520,9 @@ function HeroSection() {
   }
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+    <section id="home" className="observatory-hero min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+      <div className="absolute inset-0 observatory-grid" />
+      <div className="absolute inset-x-0 top-24 mx-auto h-px max-w-7xl bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-30" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
       <div
@@ -536,6 +538,7 @@ function HeroSection() {
             </div>
 
             <div className="space-y-2">
+              <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.28em] text-muted-foreground font-mono"><span className="signal-line" />Technical Observatory / 2026</div>
               <p className="text-cyan-400 font-mono text-sm tracking-wider">{"Welcome to Vinay's World"}</p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold">
                 <TypewriterText
@@ -598,7 +601,8 @@ function HeroSection() {
           </div>
 
           <div className="flex justify-center lg:justify-end">
-            <div className="relative">
+            <div className="relative hero-portrait-frame">
+              <div className="absolute -right-8 top-8 hidden w-32 translate-x-full flex-col gap-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground lg:flex"><span>Signal / 01</span><span className="h-px w-full bg-border" /><span className="text-cyan-300">Secure systems</span><span className="text-violet-300">Human focus</span></div>
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-violet-500 to-purple-500 rounded-2xl blur opacity-75 animate-pulse" />
               <div className="relative">
                 <img
@@ -1150,6 +1154,13 @@ function NovaAssistant() {
   const [command, setCommand] = useState("")
   const recognitionRef = useRef<any>(null)
   const continuousRef = useRef(true)
+  const visibleRef = useRef(false)
+  const restartingRef = useRef(false)
+  const supportedRef = useRef(false)
+  const statusRef = useRef("Silent standby")
+
+  useEffect(() => { visibleRef.current = visible }, [visible])
+  useEffect(() => { statusRef.current = status }, [status])
 
   const speak = (text: string) => {
     setTranscript(text)
@@ -1205,7 +1216,11 @@ function NovaAssistant() {
       { words: ["contact", "email", "reach vinay"], target: "#contact", answer: "You can reach Vinay by email at vinay.1si22cs201@gmail.com or through his GitHub and LinkedIn links in the contact section." },
       { words: ["who is vinay", "about vinay", "tell me about"], target: "#home", answer: "Vinay is a Software Engineer 1 focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Welcome to his technical world." },
     ]
-    const match = answers.find((item) => item.words.some((word) => text.includes(word)))
+    const normalized = text.replace(/[?!.,]/g, " ").replace(/\s+/g, " ").trim()
+  const match = answers
+    .map((item) => ({ item, score: item.words.reduce((score, word) => score + (normalized.includes(word) ? (word.includes(" ") ? 4 : 2) : 0), 0) }))
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score)[0]?.item
     if (match) {
       document.querySelector(match.target)?.scrollIntoView({ behavior: "smooth" })
       speak(match.answer)
@@ -1215,32 +1230,71 @@ function NovaAssistant() {
     speak("I understand portfolio questions about Vinay's technical skills, projects, experience, PAN-OS automation, education, achievements, certifications, contact, resume, and themes. Please ask your question naturally.")
   }
 
-  const startListening = () => {
+  const startListening = async () => {
+    if (restartingRef.current || !continuousRef.current || listening) return
     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!Recognition) { setStatus("Type command"); setVisible(true); speak("Voice recognition is not available in this browser, but typed commands are ready."); return }
+    if (!Recognition) {
+      supportedRef.current = false
+      setStatus("Voice unavailable")
+      setVisible(true)
+      setTranscript("This browser does not expose speech recognition. Typed commands still work here.")
+      return
+    }
+    supportedRef.current = true
+    try {
+      if (navigator.mediaDevices?.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach((track) => track.stop())
+      }
+    } catch {
+      setStatus("Microphone permission needed")
+      setTranscript("Allow microphone access in your browser, then use the retry control to enable continuous listening.")
+      return
+    }
     const recognition = new Recognition()
     recognition.lang = "en-US"
     recognition.continuous = true
     recognition.interimResults = false
-    recognition.onstart = () => { setListening(true); setStatus(visible ? "Listening" : "Silent standby") }
+    recognition.maxAlternatives = 3
+    recognition.onstart = () => { restartingRef.current = false; setListening(true); setStatus(visibleRef.current ? "Listening" : "Silent standby") }
     recognition.onresult = (event: any) => {
-      const phrase = event.results[event.results.length - 1][0].transcript
-      const activation = phrase.toLowerCase().includes("activate") || phrase.toLowerCase().includes("nova")
-      if (visible || activation) route(phrase)
+      const result = event.results[event.results.length - 1]
+      const phrase = result?.[0]?.transcript?.trim() || ""
+      if (!phrase) return
+      const spoken = phrase.toLowerCase()
+      const activation = spoken.includes("activate") || spoken.includes("wake") || spoken.includes("nova") || spoken.includes("voice command")
+      const standby = spoken.includes("standby") || spoken.includes("close voice") || spoken.includes("hide assistant")
+      if (standby || visibleRef.current || activation) route(phrase)
     }
-    recognition.onerror = () => setListening(false)
-    recognition.onend = () => { setListening(false); if (continuousRef.current) setTimeout(startListening, 600) }
+    recognition.onerror = (event: any) => {
+      setListening(false)
+      if (event?.error === "not-allowed" || event?.error === "service-not-allowed") setStatus("Microphone permission needed")
+      else if (event?.error !== "aborted") setStatus("Reconnecting")
+    }
+    recognition.onend = () => {
+      setListening(false)
+      recognitionRef.current = null
+      if (continuousRef.current && !restartingRef.current) {
+        restartingRef.current = true
+        window.setTimeout(() => { restartingRef.current = false; startListening() }, 450)
+      }
+    }
     recognitionRef.current = recognition
-    recognition.start()
+    try { recognition.start() } catch { recognitionRef.current = null; restartingRef.current = false }
   }
 
-  useEffect(() => { startListening(); return () => { continuousRef.current = false; recognitionRef.current?.stop(); window.speechSynthesis?.cancel() } }, [])
+  useEffect(() => {
+    continuousRef.current = true
+    const timer = window.setTimeout(() => startListening(), 700)
+    return () => { continuousRef.current = false; window.clearTimeout(timer); recognitionRef.current?.stop(); window.speechSynthesis?.cancel() }
+  }, [])
 
   return (
     <aside className={`fixed bottom-5 right-5 z-40 ${visible ? "w-[min(390px,calc(100vw-2rem))]" : "w-auto"}`} aria-label="NOVA personal assistant">
-      {!visible ? <button onClick={() => { setVisible(true); setStatus("Listening"); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className="size-2 rounded-full bg-cyan-300" />NOVA / standby</button> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
+      {!visible ? <button onClick={() => { setVisible(true); setStatus("Listening"); startListening(); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className={`size-2 rounded-full ${listening ? "bg-emerald-400 nova-live-dot" : "bg-cyan-300"}`} />NOVA / {listening ? "listening" : "standby"}</button> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">NOVA / voice interface</p><p className="mt-1 text-sm font-medium">{listening ? "Listening continuously" : status}</p></div><button onClick={() => { setVisible(false); window.speechSynthesis?.cancel() }} className="text-xs text-muted-foreground hover:text-foreground">Standby</button></div>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground" aria-live="polite">{transcript}</p>
+        {(status === "Microphone permission needed" || status === "Voice unavailable") && <Button variant="outline" size="sm" className="mt-3" onClick={() => startListening()}>Retry microphone</Button>}
         <div className="mt-3 flex gap-2"><input aria-label="Ask NOVA" value={command} onChange={(event) => setCommand(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { route(command); setCommand("") } }} placeholder="Ask about Vinay's world..." className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs outline-none focus:border-cyan-400" /><Button size="sm" onClick={() => { route(command); setCommand("") }}>Ask</Button></div>
         <div className="mt-3 flex flex-wrap gap-2">{["Technical skills", "Achievements", "PAN-OS work", "Change to light theme"].map((item) => <button key={item} onClick={() => route(item)} className="rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground hover:border-cyan-400 hover:text-cyan-300">{item}</button>)}</div>
         <div className="mt-3 flex items-center justify-between"><button onClick={() => window.speechSynthesis?.cancel()} className="text-[10px] text-muted-foreground underline underline-offset-4">Stop response</button><button onClick={() => { continuousRef.current = false; recognitionRef.current?.stop(); setVisible(false); setStatus("Silent standby") }} className="text-[10px] text-muted-foreground underline underline-offset-4">Mute voice</button></div>
