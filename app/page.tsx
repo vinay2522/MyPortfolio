@@ -37,8 +37,8 @@ function useTheme() {
   const [theme, setTheme] = useState<"dark" | "light">("dark")
 
   useEffect(() => {
-    const stored = localStorage.getItem("portfolio-theme") as "dark" | "light"
-    if (stored) setTheme(stored)
+    const stored = localStorage.getItem("portfolio-theme") as "dark" | "light" | null
+    if (stored === "dark" || stored === "light") setTheme(stored)
   }, [])
 
   useEffect(() => {
@@ -50,6 +50,15 @@ function useTheme() {
     }
     localStorage.setItem("portfolio-theme", theme)
   }, [theme])
+
+  useEffect(() => {
+    const handleThemeChange = (event: Event) => {
+      const nextTheme = (event as CustomEvent<"dark" | "light">).detail
+      if (nextTheme === "dark" || nextTheme === "light") setTheme(nextTheme)
+    }
+    window.addEventListener("portfolio-theme-change", handleThemeChange)
+    return () => window.removeEventListener("portfolio-theme-change", handleThemeChange)
+  }, [])
 
   const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"))
 
@@ -291,130 +300,6 @@ const blogPosts = [
 ]
 
 /* code showcase removed */
-const legacyCodeSnippetsRemoved = [
-  {
-    id: 1,
-    title: "Smart Contract - Evidence Chain",
-    language: "solidity",
-    code: `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-contract EvidenceChain {
-    struct Evidence {
-        bytes32 hash;
-        address owner;
-        uint256 timestamp;
-        bool verified;
-    }
-    
-    mapping(uint256 => Evidence) public evidences;
-    uint256 public evidenceCount;
-    
-    event EvidenceAdded(
-        uint256 id, 
-        bytes32 hash, 
-        address owner
-    );
-    
-    function addEvidence(bytes32 _hash) 
-        public returns (uint256) 
-    {
-        evidenceCount++;
-        evidences[evidenceCount] = Evidence({
-            hash: _hash,
-            owner: msg.sender,
-            timestamp: block.timestamp,
-            verified: true
-        });
-        emit EvidenceAdded(
-            evidenceCount, 
-            _hash, 
-            msg.sender
-        );
-        return evidenceCount;
-    }
-}`,
-    description: "Smart contract for immutable evidence storage",
-  },
-  {
-    id: 2,
-    title: "ML Prediction Model",
-    language: "python",
-    code: `import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
-
-class AmbulancePredictor:
-    def __init__(self):
-        self.model = RandomForestRegressor(
-            n_estimators=100,
-            max_depth=10,
-            random_state=42
-        )
-        self.scaler = StandardScaler()
-    
-    def preprocess(self, data):
-        features = [
-            'hour', 'day_of_week',
-            'population_density',
-            'historical_demand',
-            'weather_severity'
-        ]
-        return self.scaler.fit_transform(
-            data[features]
-        )
-    
-    def predict_demand(self, X):
-        X_scaled = self.preprocess(X)
-        return self.model.predict(X_scaled)
-    
-    def optimize_dispatch(self, demand):
-        # Allocation algorithm
-        return np.argsort(demand)[::-1]`,
-    description: "ML model for ambulance demand forecasting",
-  },
-  {
-    id: 3,
-    title: "AWS Lambda Handler",
-    language: "javascript",
-    code: `const AWS = require('aws-sdk');
-const dynamoDB = new AWS.DynamoDB
-    .DocumentClient();
-const crypto = require('crypto');
-
-exports.handler = async (event) => {
-    const { url } = JSON.parse(event.body);
-    
-    // Generate short code
-    const shortCode = crypto
-        .randomBytes(4)
-        .toString('base64url');
-    
-    // Store in DynamoDB
-    await dynamoDB.put({
-        TableName: 'URLShortener',
-        Item: {
-            shortCode,
-            originalUrl: url,
-            createdAt: Date.now(),
-            clicks: 0
-        }
-    }).promise();
-    
-    return {
-        statusCode: 200,
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify({
-            shortUrl: \`https://short.ly/\${shortCode}\`
-        })
-    };
-};`,
-    description: "Serverless URL shortener with DynamoDB",
-  },
-]
 
 // The portfolio data above is the single source of truth for the ATS-friendly resume.
 function downloadResumePdf() {
@@ -1257,118 +1142,109 @@ function ContactSection() {
   )
 }
 
-function JarvisAssistant() {
-  const [enabled, setEnabled] = useState(true)
+function NovaAssistant() {
+  const [visible, setVisible] = useState(false)
   const [listening, setListening] = useState(false)
-  const [status, setStatus] = useState("Standby")
-  const [transcript, setTranscript] = useState("Welcome to Vinay's World. Ask me for a tour, projects, experience, skills, or your resume.")
+  const [status, setStatus] = useState("Silent standby")
+  const [transcript, setTranscript] = useState("NOVA is quiet. Say “activate voice command” to bring the interface forward.")
   const [command, setCommand] = useState("")
   const recognitionRef = useRef<any>(null)
-
-  useEffect(() => {
-    setEnabled(localStorage.getItem("vinay-jarvis-disabled") !== "true")
-  }, [])
+  const continuousRef = useRef(true)
 
   const speak = (text: string) => {
     setTranscript(text)
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel()
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.rate = 0.98
-      utterance.pitch = 0.9
-      window.speechSynthesis.speak(utterance)
-      setStatus("Speaking")
-      utterance.onend = () => setStatus("Standby")
+    window.speechSynthesis?.cancel()
+    if (window.speechSynthesis) {
+      const voice = new SpeechSynthesisUtterance(text)
+      voice.rate = 0.98
+      voice.pitch = 0.86
+      window.speechSynthesis.speak(voice)
+      setStatus("Responding")
+      voice.onend = () => setStatus(visible ? "Listening" : "Silent standby")
     }
   }
 
-  const runCommand = (raw: string) => {
+  const route = (raw: string) => {
     const text = raw.toLowerCase().trim()
     if (!text) return
-    setStatus("Thinking")
-    if (text.includes("disable") || text.includes("turn off") || text.includes("stop assistant")) {
-      setEnabled(false)
-      localStorage.setItem("vinay-jarvis-disabled", "true")
+    if (text.includes("activate") || text.includes("wake") || text.includes("open voice")) {
+      setVisible(true)
+      setStatus("Listening")
+      speak("NOVA online. Welcome to Vinay's World. Ask me anything about his work, skills, projects, education, achievements, or resume.")
+      return
+    }
+    if (text.includes("standby") || text.includes("close voice") || text.includes("hide assistant")) {
+      setVisible(false)
       window.speechSynthesis?.cancel()
-      setStatus("Disabled")
-      setTranscript("Jarvis is offline. You can restore the assistant whenever you are ready.")
+      setStatus("Silent standby")
+      setTranscript("NOVA is quiet. Say “activate voice command” to bring the interface forward.")
       return
     }
-    if (text.includes("resume")) {
-      speak("Your ATS-friendly resume is ready. I am preparing the download now.")
-      downloadResumePdf()
+    if (text.includes("light theme") || text.includes("light mode") || text.includes("change theme to light")) {
+      localStorage.setItem("portfolio-theme", "light")
+      document.documentElement.classList.remove("dark")
+      window.dispatchEvent(new CustomEvent("portfolio-theme-change", { detail: "light" }))
+      speak("Light theme enabled.")
       return
     }
-    const target = text.includes("project") ? "#projects" : text.includes("experience") ? "#experience" : text.includes("skill") ? "#skills" : text.includes("education") ? "#education" : text.includes("achievement") ? "#achievements" : text.includes("contact") ? "#contact" : "#projects"
-    if (text.includes("pan-os") || text.includes("firewall")) {
-      speak("The PAN-OS Upgrade Automation Platform standardizes Palo Alto firewall upgrades. Vinay built validation, health checks, backup verification, post-upgrade monitoring, reporting, and HA-aware workflows using Python and PAN-OS XML APIs.")
-      document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" })
+    if (text.includes("dark theme") || text.includes("dark mode") || text.includes("change theme to dark")) {
+      localStorage.setItem("portfolio-theme", "dark")
+      document.documentElement.classList.add("dark")
+      window.dispatchEvent(new CustomEvent("portfolio-theme-change", { detail: "dark" }))
+      speak("Dark theme enabled.")
       return
     }
-    if (text.includes("tour") || text.includes("vinay") || text.includes("who")) {
-      speak("Welcome to Vinay's World. Vinay is a Software Engineer 1 joining Nike CIS, focused on secure automation, enterprise infrastructure, and thoughtful software engineering. Explore his projects, experience, and technical skills below.")
+    const answers = [
+      { words: ["technical skill", "skills", "technology", "tech stack", "programming"], target: "#skills", answer: "Vinay's technical toolkit spans Python, Java, JavaScript, TypeScript, React, Next.js, Node.js, Solidity, Ethereum, IPFS, AWS, Docker, Git, PostgreSQL, MongoDB, REST APIs, PAN-OS XML APIs, cybersecurity testing, machine learning, and secure automation." },
+      { words: ["achievement", "achievements", "award", "hackathon"], target: "#achievements", answer: "Vinay's achievements include hackathon recognition, competitive programming milestones, research and project work, and certifications across cloud, security, and software engineering." },
+      { words: ["project", "projects", "built", "portfolio project"], target: "#projects", answer: "Vinay's projects include a blockchain secured evidence chain using Ethereum, Solidity, and IPFS; an AI ambulance dispatch system; plant disease detection; and a serverless URL shortener built on AWS. I can narrate each one if you name it." },
+      { words: ["experience", "internship", "career", "work at nike", "work history"], target: "#experience", answer: "Vinay joins Nike as Software Engineer 1 in CIS on August 13, 2026. Before that, he completed a Nike CIS software engineering internship from January to July 2026, building the PAN-OS Upgrade Automation Platform, and worked at Nokia from August to December 2025." },
+      { words: ["pan-os", "firewall", "automation platform", "palo alto"], target: "#experience", answer: "The PAN-OS Upgrade Automation Platform standardizes enterprise Palo Alto firewall upgrades. Vinay worked on pre-upgrade validation, health checks, backup verification, post-upgrade validation, monitoring, reporting, HA concepts, Python, and PAN-OS XML APIs." },
+      { words: ["education", "graduation", "degree", "college", "cgpa"], target: "#education", answer: "Vinay graduated from Siddaganga Institute of Technology with a Bachelor of Engineering in Computer Science in July 2026, earning an 8.96 CGPA out of 10." },
+      { words: ["resume", "cv", "download resume"], target: "#contact", answer: "Vinay's complete ATS-friendly resume is ready to download from the portfolio. I am starting the PDF download now." },
+      { words: ["contact", "email", "reach vinay"], target: "#contact", answer: "You can reach Vinay by email at vinay.1si22cs201@gmail.com or through his GitHub and LinkedIn links in the contact section." },
+      { words: ["who is vinay", "about vinay", "tell me about"], target: "#home", answer: "Vinay is a Software Engineer 1 focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Welcome to his technical world." },
+    ]
+    const match = answers.find((item) => item.words.some((word) => text.includes(word)))
+    if (match) {
+      document.querySelector(match.target)?.scrollIntoView({ behavior: "smooth" })
+      speak(match.answer)
+      if (text.includes("resume")) downloadResumePdf()
       return
     }
-    if (text.includes("project") || text.includes("built") || text.includes("show")) {
-      speak("Vinay has built a secured evidence chain using Ethereum, Solidity, and IPFS; an AI ambulance dispatch system using machine learning; a plant disease detection model; and a serverless URL shortener on AWS.")
-    } else {
-      speak("I can guide you through Vinay's projects, experience, education, skills, achievements, contact details, or resume. Try saying: narrate the projects.")
-    }
-    document.querySelector(target)?.scrollIntoView({ behavior: "smooth" })
+    speak("I understand portfolio questions about Vinay's technical skills, projects, experience, PAN-OS automation, education, achievements, certifications, contact, resume, and themes. Please ask your question naturally.")
   }
 
   const startListening = () => {
     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!Recognition) {
-      setStatus("Unavailable")
-      speak("Voice recognition is not available in this browser. You can still type a command below.")
-      return
-    }
+    if (!Recognition) { setStatus("Type command"); setVisible(true); speak("Voice recognition is not available in this browser, but typed commands are ready."); return }
     const recognition = new Recognition()
     recognition.lang = "en-US"
+    recognition.continuous = true
     recognition.interimResults = false
-    recognition.onstart = () => { setListening(true); setStatus("Listening") }
-    recognition.onresult = (event: any) => runCommand(event.results[0][0].transcript)
-    recognition.onerror = () => { setListening(false); setStatus("Unavailable") }
-    recognition.onend = () => { setListening(false); if (status === "Listening") setStatus("Standby") }
+    recognition.onstart = () => { setListening(true); setStatus(visible ? "Listening" : "Silent standby") }
+    recognition.onresult = (event: any) => {
+      const phrase = event.results[event.results.length - 1][0].transcript
+      const activation = phrase.toLowerCase().includes("activate") || phrase.toLowerCase().includes("nova")
+      if (visible || activation) route(phrase)
+    }
+    recognition.onerror = () => setListening(false)
+    recognition.onend = () => { setListening(false); if (continuousRef.current) setTimeout(startListening, 600) }
     recognitionRef.current = recognition
     recognition.start()
   }
 
-  if (!enabled) {
-    return (
-      <section className="fixed bottom-5 right-5 z-40 max-w-xs rounded-2xl border border-border bg-card/95 p-4 shadow-2xl backdrop-blur">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Jarvis offline</p>
-        <p className="mt-2 text-sm text-muted-foreground">Voice is optional. Restore the personal assistant whenever you want.</p>
-        <Button size="sm" className="mt-3" onClick={() => { setEnabled(true); localStorage.removeItem("vinay-jarvis-disabled"); setStatus("Standby") }}>Restore assistant</Button>
-      </section>
-    )
-  }
+  useEffect(() => { startListening(); return () => { continuousRef.current = false; recognitionRef.current?.stop(); window.speechSynthesis?.cancel() } }, [])
 
   return (
-    <aside className="fixed bottom-5 right-5 z-40 w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl" aria-label="Jarvis personal assistant">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <button aria-label="Start voice command" onClick={startListening} className={`relative grid size-12 place-items-center rounded-full border border-cyan-400/50 bg-cyan-400/10 ${listening ? "assistant-orb-active" : ""}`}>
-            <span className="absolute inset-1 rounded-full border border-cyan-300/30" />
-            <Terminal className="size-5 text-cyan-300" />
-          </button>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">Vinay OS / Jarvis</p>
-            <p className="mt-1 text-sm font-medium">{status}</p>
-          </div>
-        </div>
-        <button aria-label="Disable Jarvis" onClick={() => { setEnabled(false); localStorage.setItem("vinay-jarvis-disabled", "true") }} className="text-xs text-muted-foreground hover:text-foreground">Disable</button>
-      </div>
-      <p className="mt-4 text-sm leading-relaxed text-muted-foreground" aria-live="polite">{transcript}</p>
-      <div className="mt-3 flex gap-2">
-        <input aria-label="Type a command" value={command} onChange={(event) => setCommand(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { runCommand(command); setCommand("") } }} placeholder="Ask Jarvis anything grounded..." className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs outline-none focus:border-cyan-400" />
-        <Button size="sm" onClick={() => { runCommand(command); setCommand("") }}>Run</Button>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {["Give me a tour", "Narrate projects", "Explain PAN-OS", "Download resume"].map((item) => <button key={item} onClick={() => runCommand(item)} className="rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground hover:border-cyan-400 hover:text-cyan-300">{item}</button>)}
-      </div>
-      <button onClick={() => window.speechSynthesis?.cancel()} className="mt-3 text-[10px] text-muted-foreground underline underline-offset-4">Stop speaking</button>
+    <aside className={`fixed bottom-5 right-5 z-40 ${visible ? "w-[min(390px,calc(100vw-2rem))]" : "w-auto"}`} aria-label="NOVA personal assistant">
+      {!visible ? <button onClick={() => { setVisible(true); setStatus("Listening"); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className="size-2 rounded-full bg-cyan-300" />NOVA / standby</button> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
+        <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">NOVA / voice interface</p><p className="mt-1 text-sm font-medium">{listening ? "Listening continuously" : status}</p></div><button onClick={() => { setVisible(false); window.speechSynthesis?.cancel() }} className="text-xs text-muted-foreground hover:text-foreground">Standby</button></div>
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground" aria-live="polite">{transcript}</p>
+        <div className="mt-3 flex gap-2"><input aria-label="Ask NOVA" value={command} onChange={(event) => setCommand(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { route(command); setCommand("") } }} placeholder="Ask about Vinay's world..." className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs outline-none focus:border-cyan-400" /><Button size="sm" onClick={() => { route(command); setCommand("") }}>Ask</Button></div>
+        <div className="mt-3 flex flex-wrap gap-2">{["Technical skills", "Achievements", "PAN-OS work", "Change to light theme"].map((item) => <button key={item} onClick={() => route(item)} className="rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground hover:border-cyan-400 hover:text-cyan-300">{item}</button>)}</div>
+        <div className="mt-3 flex items-center justify-between"><button onClick={() => window.speechSynthesis?.cancel()} className="text-[10px] text-muted-foreground underline underline-offset-4">Stop response</button><button onClick={() => { continuousRef.current = false; recognitionRef.current?.stop(); setVisible(false); setStatus("Silent standby") }} className="text-[10px] text-muted-foreground underline underline-offset-4">Mute voice</button></div>
+      </div>}
     </aside>
   )
 }
@@ -1421,7 +1297,7 @@ export default function Portfolio() {
         <ContactSection />
       </main>
       <Footer />
-      <JarvisAssistant />
+      <NovaAssistant />
     </div>
   )
 }
