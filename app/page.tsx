@@ -11,7 +11,6 @@ import {
   Moon,
   Github,
   Mail,
-  Phone,
   MapPin,
   ExternalLink,
   ChevronDown,
@@ -291,7 +290,8 @@ const blogPosts = [
   },
 ]
 
-const codeSnippets = [
+/* code showcase removed */
+const legacyCodeSnippetsRemoved = [
   {
     id: 1,
     title: "Smart Contract - Evidence Chain",
@@ -420,47 +420,71 @@ exports.handler = async (event) => {
 function downloadResumePdf() {
   import("jspdf/dist/jspdf.es.min.js").then(({ jsPDF }) => {
     const pdf = new jsPDF({ unit: "pt", format: "a4" })
-    const margin = 42
-    const width = 595 - margin * 2
-    let y = 48
-    const addText = (text: string, size = 10, bold = false, gap = 14) => {
+    const margin = 44
+    const pageWidth = 595
+    const pageHeight = 842
+    const width = pageWidth - margin * 2
+    let y = 46
+    const ensureRoom = (height = 24) => {
+      if (y + height > pageHeight - 48) {
+        pdf.addPage()
+        y = 46
+        pdf.setFont("helvetica", "normal")
+        pdf.setFontSize(8)
+        pdf.text("VINAY NAIK V  ·  Software Engineer 1", margin, 28)
+        pdf.text("ATS Resume", pageWidth - margin - 42, 28)
+      }
+    }
+    const addText = (text: string, size = 10, bold = false, gap = 10) => {
       pdf.setFont("helvetica", bold ? "bold" : "normal")
       pdf.setFontSize(size)
       const lines = pdf.splitTextToSize(text, width)
+      const height = lines.length * (size + 3)
+      ensureRoom(height + gap)
       pdf.text(lines, margin, y)
-      y += lines.length * (size + 3) + gap
+      y += height + gap
     }
     const section = (title: string) => {
+      ensureRoom(32)
       y += 4
-      pdf.setDrawColor(35, 87, 137)
-      pdf.line(margin, y, 553, y)
-      y += 18
-      addText(title.toUpperCase(), 11, true, 6)
+      pdf.setDrawColor(145, 145, 145)
+      pdf.line(margin, y, pageWidth - margin, y)
+      y += 16
+      addText(title.toUpperCase(), 10, true, 5)
     }
+    const bullet = (text: string) => addText(`- ${text}`, 9, false, 3)
 
-    addText("VINAY NAIK V", 20, true, 4)
-    addText("Software Engineer 1 · Cybersecurity Automation · Full-Stack Engineering", 10, false, 4)
-    addText("Bangalore, India  |  vinay.1si22cs201@gmail.com  |  +91-8147938224  |  github.com/vinay2522", 9, false, 10)
+    addText("VINAY NAIK V", 19, true, 3)
+    addText("Software Engineer 1 | Cybersecurity Automation | Full-Stack Engineering", 10, false, 3)
+    addText("Bangalore, India | vinay.1si22cs201@gmail.com | github.com/vinay2522 | linkedin.com/in/vinay-naik-v", 9, false, 8)
     section("Professional Summary")
-    addText("Software engineer focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Experienced with Python, PAN-OS XML APIs, firewall workflows, cybersecurity testing, cloud technologies, and full-stack development.", 10, false, 8)
-    section("Experience")
+    addText("Software Engineer 1 focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Experienced with Python, PAN-OS XML APIs, firewall workflows, cybersecurity testing, cloud technologies, and full-stack development.", 9, false, 6)
+    section("Technical Skills")
+    Object.entries(skills).forEach(([category, items]) => addText(`${category}: ${items.join(", ")}`, 9, false, 3))
+    section("Professional Experience")
     experience.forEach((exp) => {
       addText(`${exp.title} | ${exp.company}`, 10, true, 2)
       addText(`${exp.period} | ${exp.location}`, 9, false, 3)
-      exp.description.forEach((item) => addText(`• ${item}`, 9, false, 2))
-      y += 5
+      exp.description.forEach(bullet)
+      y += 4
+    })
+    section("Selected Projects")
+    projects.forEach((project) => {
+      addText(project.title, 10, true, 2)
+      bullet(project.description)
+      addText(`Technologies: ${project.tech.join(", ")} | ${project.github}`, 8, false, 5)
     })
     section("Education")
     education.forEach((edu) => {
       addText(`${edu.degree} | ${edu.institution}`, 10, true, 2)
-      addText(`${edu.period} | ${edu.location} | ${edu.score}`, 9, false, 7)
+      addText(`${edu.period} | ${edu.location} | ${edu.score}`, 9, false, 5)
     })
-    section("Technical Skills")
-    Object.entries(skills).forEach(([category, items]) => addText(`${category}: ${items.join(", ")}`, 9, false, 3))
-    section("Achievements & Certifications")
-    achievements.forEach((item) => addText(`${item.title} — ${item.description} (${item.year})`, 9, false, 3))
-    certifications.forEach((item) => addText(`${item.name} — ${item.issuer}`, 9, false, 3))
-
+    section("Achievements")
+    achievements.forEach((item) => bullet(`${item.title} - ${item.description} (${item.year}); ${item.venue}`))
+    section("Certifications")
+    certifications.forEach((item) => bullet(`${item.name} - ${item.issuer}`))
+    section("Relevant Links")
+    addText("GitHub: https://github.com/vinay2522 | LinkedIn: https://linkedin.com/in/vinay-naik-v", 9, false, 4)
     pdf.save("Vinay Naik V Resume.pdf")
   })
 }
@@ -537,7 +561,6 @@ function Navigation() {
     { name: "Skills", href: "#skills" },
     { name: "Experience", href: "#experience" },
     { name: "Blog", href: "#blog" },
-    { name: "Code", href: "#code" },
     { name: "Contact", href: "#contact" },
   ]
 
@@ -628,7 +651,7 @@ function HeroSection() {
             </div>
 
             <div className="space-y-2">
-              <p className="text-cyan-400 font-mono text-sm tracking-wider">{"Hello, I'm"}</p>
+              <p className="text-cyan-400 font-mono text-sm tracking-wider">{"Welcome to Vinay's World"}</p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold">
                 <TypewriterText
                   text="Vinay Naik V"
@@ -685,12 +708,6 @@ function HeroSection() {
                 className="p-2 rounded-full bg-card border border-border hover:border-cyan-500 transition-colors"
               >
                 <Mail className="h-5 w-5" />
-              </a>
-              <a
-                href="tel:+918147938224"
-                className="p-2 rounded-full bg-card border border-border hover:border-purple-500 transition-colors"
-              >
-                <Phone className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -1206,19 +1223,6 @@ function ContactSection() {
                 </a>
 
                 <a
-                  href="tel:+918147938224"
-                  className="flex items-center gap-4 p-4 rounded-lg bg-background hover:bg-muted transition-colors group"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="font-medium text-sm group-hover:text-violet-400 transition-colors">+91-8147938224</p>
-                  </div>
-                </a>
-
-                <a
                   href="https://github.com/vinay2522"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1250,6 +1254,122 @@ function ContactSection() {
         </ScrollReveal>
       </div>
     </section>
+  )
+}
+
+function JarvisAssistant() {
+  const [enabled, setEnabled] = useState(true)
+  const [listening, setListening] = useState(false)
+  const [status, setStatus] = useState("Standby")
+  const [transcript, setTranscript] = useState("Welcome to Vinay's World. Ask me for a tour, projects, experience, skills, or your resume.")
+  const [command, setCommand] = useState("")
+  const recognitionRef = useRef<any>(null)
+
+  useEffect(() => {
+    setEnabled(localStorage.getItem("vinay-jarvis-disabled") !== "true")
+  }, [])
+
+  const speak = (text: string) => {
+    setTranscript(text)
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel()
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.rate = 0.98
+      utterance.pitch = 0.9
+      window.speechSynthesis.speak(utterance)
+      setStatus("Speaking")
+      utterance.onend = () => setStatus("Standby")
+    }
+  }
+
+  const runCommand = (raw: string) => {
+    const text = raw.toLowerCase().trim()
+    if (!text) return
+    setStatus("Thinking")
+    if (text.includes("disable") || text.includes("turn off") || text.includes("stop assistant")) {
+      setEnabled(false)
+      localStorage.setItem("vinay-jarvis-disabled", "true")
+      window.speechSynthesis?.cancel()
+      setStatus("Disabled")
+      setTranscript("Jarvis is offline. You can restore the assistant whenever you are ready.")
+      return
+    }
+    if (text.includes("resume")) {
+      speak("Your ATS-friendly resume is ready. I am preparing the download now.")
+      downloadResumePdf()
+      return
+    }
+    const target = text.includes("project") ? "#projects" : text.includes("experience") ? "#experience" : text.includes("skill") ? "#skills" : text.includes("education") ? "#education" : text.includes("achievement") ? "#achievements" : text.includes("contact") ? "#contact" : "#projects"
+    if (text.includes("pan-os") || text.includes("firewall")) {
+      speak("The PAN-OS Upgrade Automation Platform standardizes Palo Alto firewall upgrades. Vinay built validation, health checks, backup verification, post-upgrade monitoring, reporting, and HA-aware workflows using Python and PAN-OS XML APIs.")
+      document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" })
+      return
+    }
+    if (text.includes("tour") || text.includes("vinay") || text.includes("who")) {
+      speak("Welcome to Vinay's World. Vinay is a Software Engineer 1 joining Nike CIS, focused on secure automation, enterprise infrastructure, and thoughtful software engineering. Explore his projects, experience, and technical skills below.")
+      return
+    }
+    if (text.includes("project") || text.includes("built") || text.includes("show")) {
+      speak("Vinay has built a secured evidence chain using Ethereum, Solidity, and IPFS; an AI ambulance dispatch system using machine learning; a plant disease detection model; and a serverless URL shortener on AWS.")
+    } else {
+      speak("I can guide you through Vinay's projects, experience, education, skills, achievements, contact details, or resume. Try saying: narrate the projects.")
+    }
+    document.querySelector(target)?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const startListening = () => {
+    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!Recognition) {
+      setStatus("Unavailable")
+      speak("Voice recognition is not available in this browser. You can still type a command below.")
+      return
+    }
+    const recognition = new Recognition()
+    recognition.lang = "en-US"
+    recognition.interimResults = false
+    recognition.onstart = () => { setListening(true); setStatus("Listening") }
+    recognition.onresult = (event: any) => runCommand(event.results[0][0].transcript)
+    recognition.onerror = () => { setListening(false); setStatus("Unavailable") }
+    recognition.onend = () => { setListening(false); if (status === "Listening") setStatus("Standby") }
+    recognitionRef.current = recognition
+    recognition.start()
+  }
+
+  if (!enabled) {
+    return (
+      <section className="fixed bottom-5 right-5 z-40 max-w-xs rounded-2xl border border-border bg-card/95 p-4 shadow-2xl backdrop-blur">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Jarvis offline</p>
+        <p className="mt-2 text-sm text-muted-foreground">Voice is optional. Restore the personal assistant whenever you want.</p>
+        <Button size="sm" className="mt-3" onClick={() => { setEnabled(true); localStorage.removeItem("vinay-jarvis-disabled"); setStatus("Standby") }}>Restore assistant</Button>
+      </section>
+    )
+  }
+
+  return (
+    <aside className="fixed bottom-5 right-5 z-40 w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl" aria-label="Jarvis personal assistant">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <button aria-label="Start voice command" onClick={startListening} className={`relative grid size-12 place-items-center rounded-full border border-cyan-400/50 bg-cyan-400/10 ${listening ? "assistant-orb-active" : ""}`}>
+            <span className="absolute inset-1 rounded-full border border-cyan-300/30" />
+            <Terminal className="size-5 text-cyan-300" />
+          </button>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">Vinay OS / Jarvis</p>
+            <p className="mt-1 text-sm font-medium">{status}</p>
+          </div>
+        </div>
+        <button aria-label="Disable Jarvis" onClick={() => { setEnabled(false); localStorage.setItem("vinay-jarvis-disabled", "true") }} className="text-xs text-muted-foreground hover:text-foreground">Disable</button>
+      </div>
+      <p className="mt-4 text-sm leading-relaxed text-muted-foreground" aria-live="polite">{transcript}</p>
+      <div className="mt-3 flex gap-2">
+        <input aria-label="Type a command" value={command} onChange={(event) => setCommand(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { runCommand(command); setCommand("") } }} placeholder="Ask Jarvis anything grounded..." className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs outline-none focus:border-cyan-400" />
+        <Button size="sm" onClick={() => { runCommand(command); setCommand("") }}>Run</Button>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {["Give me a tour", "Narrate projects", "Explain PAN-OS", "Download resume"].map((item) => <button key={item} onClick={() => runCommand(item)} className="rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground hover:border-cyan-400 hover:text-cyan-300">{item}</button>)}
+      </div>
+      <button onClick={() => window.speechSynthesis?.cancel()} className="mt-3 text-[10px] text-muted-foreground underline underline-offset-4">Stop speaking</button>
+    </aside>
   )
 }
 
@@ -1298,10 +1418,10 @@ export default function Portfolio() {
         <EducationSection />
         <AchievementsSection />
         <BlogSection />
-        <CodeSnippetsSection />
         <ContactSection />
       </main>
       <Footer />
+      <JarvisAssistant />
     </div>
   )
 }
