@@ -25,7 +25,7 @@ A stunning, dark-themed portfolio website showcasing Vinay Naik V's work as a Fu
 9. **Contact Section** - Email, phone, GitHub, location
 
 ## Project Structure
-```
+\`\`\`
 client/
   src/
     components/
@@ -38,7 +38,7 @@ client/
     index.css              # Theme variables and utilities
   public/
     vinay-photo.jpg        # Profile photo
-```
+\`\`\`
 
 ## User Preferences
 - Dark theme as default
@@ -54,7 +54,7 @@ client/
 - CSS-based animations for performance
 
 ## Running the Project
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 The application runs on port 5000.
