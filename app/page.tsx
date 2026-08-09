@@ -177,16 +177,40 @@ const skills = {
 
 const experience = [
   {
+    title: "Software Engineer 1",
+    company: "Nike · CIS (Corporate Information Security)",
+    location: "Bangalore, India",
+    period: "Aug 13, 2026 – Present",
+    description: [
+      "Joining Nike as a Software Engineer 1 within the CIS domain, building reliable software for enterprise security operations.",
+      "Bringing hands-on experience in Python automation, API integration, infrastructure workflows, and secure engineering practices.",
+    ],
+    current: true,
+  },
+  {
+    title: "Software Engineering Intern",
+    company: "Nike · CIS (Corporate Information Security)",
+    location: "Bangalore, India",
+    period: "Jan 2026 – Jul 2026",
+    description: [
+      "Developed and enhanced the PAN-OS Upgrade Automation Platform to standardize firewall upgrades across enterprise-scale Palo Alto environments.",
+      "Implemented pre-upgrade validation, health checks, backup verification, post-upgrade validation, monitoring, and reporting to improve upgrade reliability.",
+      "Worked with Python, PAN-OS XML APIs, firewall automation workflows, and High Availability (HA) concepts to design safe, scalable upgrade processes.",
+      "Contributed to upgrade safety, configuration validation, comparison reporting, and audit-ready documentation while collaborating with experienced security engineers.",
+    ],
+    current: false,
+  },
+  {
     title: "Student Intern, Security Development & Testing",
     company: "Nokia",
     location: "Bangalore, India",
-    period: "Aug 2025 – Present",
+    period: "Aug 2025 – Dec 2025",
     description: [
-      "Contributing to security development and testing of enterprise-grade CFX-5000 products",
-      "Performing advanced vulnerability analysis, penetration testing, and compliance verification",
-      "Supporting secure software lifecycle processes and automating security validation workflows",
+      "Contributed to security development and testing of enterprise-grade CFX-5000 products.",
+      "Performed vulnerability analysis, penetration testing, compliance verification, and secure software lifecycle activities.",
+      "Supported automation of security validation workflows and strengthened practical cybersecurity engineering skills.",
     ],
-    current: true,
+    current: false,
   },
 ]
 
@@ -195,7 +219,7 @@ const education = [
     institution: "Siddaganga Institute of Technology",
     degree: "Bachelor of Engineering in Computer Science",
     location: "Tumkur, India",
-    period: "2022 – Present",
+    period: "2022 – Jul 2026",
     score: "CGPA: 8.96/10",
   },
   {
@@ -259,7 +283,7 @@ const blogPosts = [
     id: 3,
     title: "Security Testing Best Practices",
     excerpt:
-      "Lessons learned from Nokia: vulnerability analysis, penetration testing, and compliance verification workflows.",
+      "Lessons learned from enterprise security work: validation, automation, and reliable compliance workflows.",
     date: "Sep 2024",
     readTime: "10 min read",
     category: "Security",
@@ -391,6 +415,55 @@ exports.handler = async (event) => {
     description: "Serverless URL shortener with DynamoDB",
   },
 ]
+
+// The portfolio data above is the single source of truth for the ATS-friendly resume.
+function downloadResumePdf() {
+  import("jspdf/dist/jspdf.es.min.js").then(({ jsPDF }) => {
+    const pdf = new jsPDF({ unit: "pt", format: "a4" })
+    const margin = 42
+    const width = 595 - margin * 2
+    let y = 48
+    const addText = (text: string, size = 10, bold = false, gap = 14) => {
+      pdf.setFont("helvetica", bold ? "bold" : "normal")
+      pdf.setFontSize(size)
+      const lines = pdf.splitTextToSize(text, width)
+      pdf.text(lines, margin, y)
+      y += lines.length * (size + 3) + gap
+    }
+    const section = (title: string) => {
+      y += 4
+      pdf.setDrawColor(35, 87, 137)
+      pdf.line(margin, y, 553, y)
+      y += 18
+      addText(title.toUpperCase(), 11, true, 6)
+    }
+
+    addText("VINAY NAIK V", 20, true, 4)
+    addText("Software Engineer 1 · Cybersecurity Automation · Full-Stack Engineering", 10, false, 4)
+    addText("Bangalore, India  |  vinay.1si22cs201@gmail.com  |  +91-8147938224  |  github.com/vinay2522", 9, false, 10)
+    section("Professional Summary")
+    addText("Software engineer focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Experienced with Python, PAN-OS XML APIs, firewall workflows, cybersecurity testing, cloud technologies, and full-stack development.", 10, false, 8)
+    section("Experience")
+    experience.forEach((exp) => {
+      addText(`${exp.title} | ${exp.company}`, 10, true, 2)
+      addText(`${exp.period} | ${exp.location}`, 9, false, 3)
+      exp.description.forEach((item) => addText(`• ${item}`, 9, false, 2))
+      y += 5
+    })
+    section("Education")
+    education.forEach((edu) => {
+      addText(`${edu.degree} | ${edu.institution}`, 10, true, 2)
+      addText(`${edu.period} | ${edu.location} | ${edu.score}`, 9, false, 7)
+    })
+    section("Technical Skills")
+    Object.entries(skills).forEach(([category, items]) => addText(`${category}: ${items.join(", ")}`, 9, false, 3))
+    section("Achievements & Certifications")
+    achievements.forEach((item) => addText(`${item.title} — ${item.description} (${item.year})`, 9, false, 3))
+    certifications.forEach((item) => addText(`${item.name} — ${item.issuer}`, 9, false, 3))
+
+    pdf.save("Vinay Naik V Resume.pdf")
+  })
+}
 
 // Components
 function TypewriterText({ text, className = "" }: { text: string; className?: string }) {
@@ -569,8 +642,8 @@ function HeroSection() {
             </p>
 
             <p className="text-muted-foreground max-w-lg mx-auto lg:mx-0">
-              Currently interning at <span className="text-cyan-400 font-semibold">Nokia</span> in Security Development.
-              Passionate about Blockchain, AI/ML, and building secure, scalable applications.
+              Now joining <span className="text-cyan-400 font-semibold">Nike</span> as a Software Engineer 1 in CIS.
+              I build secure automation platforms and scalable software for enterprise environments.
             </p>
 
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
@@ -590,6 +663,7 @@ function HeroSection() {
               </Button>
               <Button
                 variant="outline"
+                onClick={downloadResumePdf}
                 className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 bg-transparent"
               >
                 <Download className="mr-2 h-4 w-4" />
@@ -634,7 +708,7 @@ function HeroSection() {
               <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-lg p-3 shadow-xl">
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-cyan-400" />
-                  <span className="text-sm font-medium">Nokia Intern</span>
+                  <span className="text-sm font-medium">Nike · Software Engineer 1</span>
                 </div>
               </div>
             </div>

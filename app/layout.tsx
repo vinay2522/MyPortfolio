@@ -8,9 +8,9 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Vinay Naik V | Portfolio",
+  title: "Vinay Naik V | Software Engineer 1 & Security Automation Engineer",
   description:
-    "Full-Stack Developer & Security Engineer - Portfolio showcasing projects in Blockchain, AI/ML, and Cloud technologies",
+    "Portfolio of Vinay Naik V, a Software Engineer 1 at Nike CIS building secure automation platforms, enterprise infrastructure workflows, and full-stack systems.",
   generator: "v0.app",
   icons: {
     icon: [
