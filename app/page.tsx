@@ -10,6 +10,7 @@ import {
   Sun,
   Moon,
   Github,
+  Linkedin,
   Mail,
   MapPin,
   ExternalLink,
@@ -172,6 +173,25 @@ const projects = [
     category: "Cloud",
   },
 ]
+
+const projectNarrations: Record<string, { aliases: string[]; answer: string }> = {
+  "secured evidence chain blockchain": {
+    aliases: ["blockchain", "block chain", "evidence chain", "secured evidence", "ethereum", "solidity", "ipfs"],
+    answer: "The Secured Evidence Chain is a blockchain web app for securely storing and tracking digital evidence. It uses Ethereum and Solidity smart contracts for immutable audit logs, IPFS for distributed storage, and AES and RSA encryption to protect sensitive evidence.",
+  },
+  "ai-based ambulance dispatch": {
+    aliases: ["ambulance", "ambulance project", "ai ambulance", "ambulance dispatch", "dispatch", "emergency dispatch", "emergency", "machine learning dispatch", "ai based ambulance"],
+    answer: "The AI-Based Ambulance Dispatch system predicts emergency demand and improves ambulance allocation. It reduced dispatch delays by more than 60 percent through machine learning, real-time tracking, and a full-stack MERN application.",
+  },
+  "plant disease detection model": {
+    aliases: ["plant disease", "plant disease detection", "plant detection", "plant disease model", "plant model", "leaf disease", "crop disease", "tensorflow plant", "keras plant", "disease detection model", "plan disease"],
+    answer: "The Plant Disease Detection Model uses a convolutional neural network built with TensorFlow and Keras to identify plant diseases from leaf images. Vinay integrated it with a Flask web interface so users can submit images and receive a practical prediction.",
+  },
+  "serverless url shortener": {
+    aliases: ["url shortener", "serverless url shortener", "serverless shortener", "shortener", "short url", "aws url", "lambda url", "serverless project", "aws project"],
+    answer: "The Serverless URL Shortener is an AWS application using Lambda, API Gateway, S3, and DynamoDB. It generates unique short codes, stores the original URLs, and redirects users through a lightweight serverless architecture.",
+  },
+}
 
 const projectCategories = ["All", "Blockchain", "AI/ML", "Cloud"]
 
@@ -341,7 +361,7 @@ function downloadResumePdf() {
 
     addText("VINAY NAIK V", 19, true, 3)
     addText("Software Engineer 1 | Cybersecurity Automation | Full-Stack Engineering", 10, false, 3)
-    addText("Bangalore, India | vinay.1si22cs201@gmail.com | github.com/vinay2522 | linkedin.com/in/vinay-naik-v", 9, false, 8)
+    addText("Bangalore, India | vinay.1si22cs201@gmail.com | github.com/vinay2522 | www.linkedin.com/in/vinay-naik-v-4aa303251", 9, false, 8)
     section("Professional Summary")
     addText("Software Engineer 1 focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Experienced with Python, PAN-OS XML APIs, firewall workflows, cybersecurity testing, cloud technologies, and full-stack development.", 9, false, 6)
     section("Technical Skills")
@@ -369,7 +389,7 @@ function downloadResumePdf() {
     section("Certifications")
     certifications.forEach((item) => bullet(`${item.name} - ${item.issuer}`))
     section("Relevant Links")
-    addText("GitHub: https://github.com/vinay2522 | LinkedIn: https://linkedin.com/in/vinay-naik-v", 9, false, 4)
+    addText("GitHub: https://github.com/vinay2522 | LinkedIn: https://www.linkedin.com/in/vinay-naik-v-4aa303251", 9, false, 4)
     pdf.save("Vinay Naik V Resume.pdf")
   })
 }
@@ -445,8 +465,7 @@ function Navigation() {
     { name: "Projects", href: "#projects" },
     { name: "Skills", href: "#skills" },
     { name: "Experience", href: "#experience" },
-    { name: "Blog", href: "#blog" },
-    { name: "Contact", href: "#contact" },
+      { name: "Contact", href: "#contact" },
   ]
 
   const scrollToSection = (href: string) => {
@@ -634,7 +653,7 @@ function ProjectsSection() {
   const filteredProjects = activeFilter === "All" ? projects : projects.filter((p) => p.category === activeFilter)
 
   return (
-    <section id="projects" className="py-20 sm:py-32">
+    <section id="projects" className="dashboard-panel py-20 sm:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-12">
@@ -1128,6 +1147,21 @@ function ContactSection() {
                   </div>
                 </a>
 
+                <a
+                  href="https://www.linkedin.com/in/vinay-naik-v-4aa303251"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-4 rounded-lg bg-background hover:bg-muted transition-colors group"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                    <Linkedin className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">LinkedIn</p>
+                    <p className="font-medium text-sm group-hover:text-cyan-400 transition-colors">vinay-naik-v</p>
+                  </div>
+                </a>
+
                 <div className="flex items-center gap-4 p-4 rounded-lg bg-background">
                   <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                     <MapPin className="h-6 w-6 text-white" />
@@ -1158,9 +1192,12 @@ function NovaAssistant() {
   const restartingRef = useRef(false)
   const supportedRef = useRef(false)
   const statusRef = useRef("Silent standby")
+  const listeningRef = useRef(false)
+  const microphoneReadyRef = useRef(false)
 
   useEffect(() => { visibleRef.current = visible }, [visible])
   useEffect(() => { statusRef.current = status }, [status])
+  useEffect(() => { listeningRef.current = listening }, [listening])
 
   const speak = (text: string) => {
     setTranscript(text)
@@ -1205,6 +1242,21 @@ function NovaAssistant() {
       speak("Dark theme enabled.")
       return
     }
+    const navigation = [
+      { words: ["profile", "profile picture", "home", "top", "introduction", "about vinay"], target: "#home", answer: "Opening Vinay's profile and introduction. If you want to hear about him, ask: tell me about Vinay." },
+      { words: ["skills", "technical skills", "technologies", "tech stack", "programming"], target: "#skills", answer: "Opening Vinay's technical skills. If you want the details, ask: tell me about his technical skills." },
+      { words: ["experience", "work experience", "career", "internship", "work history"], target: "#experience", answer: "Opening Vinay's work experience. If you want the summary, ask: tell me about his experience." },
+      { words: ["education", "degree", "college", "graduation", "cgpa"], target: "#education", answer: "Opening Vinay's education. If you want the details, ask: tell me about his education." },
+      { words: ["achievements", "awards", "hackathons", "certifications"], target: "#achievements", answer: "Opening Vinay's achievements and certifications. If you want the details, ask: tell me about his achievements." },
+      { words: ["contact", "email", "linkedin", "reach vinay", "get in touch"], target: "#contact", answer: "Opening Vinay's contact details. If you want his links, ask: show me his contact details." },
+      { words: ["projects", "portfolio projects", "work samples"], target: "#projects", answer: "Opening Vinay's project archive. If you want one project narrated, ask: tell me about the ambulance project, plant disease model, URL shortener, or blockchain project." },
+    ]
+    const navigationMatch = navigation
+      .map((item) => ({ item, score: item.words.reduce((score, word) => score + (text.includes(word) ? (word.includes(" ") ? 4 : 2) : 0), 0) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)[0]?.item
+    const isNavigationCommand = /^(go|take|open|show me|navigate|scroll|jump|move|bring|head|visit|view)\\b|\\b(go to|navigate to|open the|show me the|take me to|scroll to)\\b/.test(text)
+
     const answers = [
       { words: ["technical skill", "skills", "technology", "tech stack", "programming"], target: "#skills", answer: "Vinay's technical toolkit spans Python, Java, JavaScript, TypeScript, React, Next.js, Node.js, Solidity, Ethereum, IPFS, AWS, Docker, Git, PostgreSQL, MongoDB, REST APIs, PAN-OS XML APIs, cybersecurity testing, machine learning, and secure automation." },
       { words: ["achievement", "achievements", "award", "hackathon"], target: "#achievements", answer: "Vinay's achievements include hackathon recognition, competitive programming milestones, research and project work, and certifications across cloud, security, and software engineering." },
@@ -1217,21 +1269,41 @@ function NovaAssistant() {
       { words: ["who is vinay", "about vinay", "tell me about"], target: "#home", answer: "Vinay is a Software Engineer 1 focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Welcome to his technical world." },
     ]
     const normalized = text.replace(/[?!.,]/g, " ").replace(/\s+/g, " ").trim()
-  const match = answers
+    const projectMatch = Object.entries(projectNarrations)
+      .map(([name, project]) => ({ name, project, score: project.aliases.reduce((score, alias) => score + (normalized.includes(alias) ? (alias.includes(" ") ? 5 : 2) : 0), 0) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)[0]
+    if (projectMatch && !isNavigationCommand) {
+      document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })
+      speak(projectMatch.project.answer)
+      return
+    }
+    const match = answers
     .map((item) => ({ item, score: item.words.reduce((score, word) => score + (normalized.includes(word) ? (word.includes(" ") ? 4 : 2) : 0), 0) }))
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)[0]?.item
+    if (navigationMatch && isNavigationCommand) {
+      document.querySelector(navigationMatch.target)?.scrollIntoView({ behavior: "smooth" })
+      speak(navigationMatch.answer)
+      return
+    }
     if (match) {
       document.querySelector(match.target)?.scrollIntoView({ behavior: "smooth" })
       speak(match.answer)
       if (text.includes("resume")) downloadResumePdf()
       return
     }
-    speak("I understand portfolio questions about Vinay's technical skills, projects, experience, PAN-OS automation, education, achievements, certifications, contact, resume, and themes. Please ask your question naturally.")
+    if (navigationMatch) {
+      document.querySelector(navigationMatch.target)?.scrollIntoView({ behavior: "smooth" })
+      speak(navigationMatch.answer)
+      return
+    }
+    speak("I can explain Vinay's individual projects, technical skills, work experience, education, achievements, certifications, contact details, resume, and themes. Try asking about the blockchain project, ambulance dispatch, plant disease model, or URL shortener.")
   }
 
-  const startListening = async () => {
-    if (restartingRef.current || !continuousRef.current || listening) return
+  const startListening = async (fromUserGesture = false) => {
+    if (fromUserGesture) continuousRef.current = true
+    if (restartingRef.current || !continuousRef.current || listeningRef.current) return
     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!Recognition) {
       supportedRef.current = false
@@ -1241,22 +1313,20 @@ function NovaAssistant() {
       return
     }
     supportedRef.current = true
-    try {
-      if (navigator.mediaDevices?.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        stream.getTracks().forEach((track) => track.stop())
-      }
-    } catch {
-      setStatus("Microphone permission needed")
-      setTranscript("Allow microphone access in your browser, then use the retry control to enable continuous listening.")
+    if (!fromUserGesture && !microphoneReadyRef.current) {
+      setStatus("Click NOVA to enable microphone")
+      setTranscript("Click NOVA once to start voice recognition. After that, say your command naturally.")
       return
     }
+    microphoneReadyRef.current = true
     const recognition = new Recognition()
     recognition.lang = "en-US"
     recognition.continuous = true
     recognition.interimResults = false
     recognition.maxAlternatives = 3
     recognition.onstart = () => { restartingRef.current = false; setListening(true); setStatus(visibleRef.current ? "Listening" : "Silent standby") }
+    recognition.onaudiostart = () => setStatus("Audio connected")
+    recognition.onspeechstart = () => setStatus("Hearing you")
     recognition.onresult = (event: any) => {
       const result = event.results[event.results.length - 1]
       const phrase = result?.[0]?.transcript?.trim() || ""
@@ -1268,8 +1338,14 @@ function NovaAssistant() {
     }
     recognition.onerror = (event: any) => {
       setListening(false)
-      if (event?.error === "not-allowed" || event?.error === "service-not-allowed") setStatus("Microphone permission needed")
-      else if (event?.error !== "aborted") setStatus("Reconnecting")
+      if (event?.error === "not-allowed" || event?.error === "service-not-allowed") {
+        microphoneReadyRef.current = false
+        setStatus("Microphone permission needed")
+        setTranscript("Microphone access was blocked. Click NOVA and choose Allow in the browser permission prompt.")
+      } else if (event?.error === "audio-capture") {
+        setStatus("No microphone detected")
+        setTranscript("NOVA cannot detect an audio input. Check your system microphone and click NOVA to retry.")
+      } else if (event?.error !== "aborted") setStatus("Reconnecting")
     }
     recognition.onend = () => {
       setListening(false)
@@ -1291,10 +1367,10 @@ function NovaAssistant() {
 
   return (
     <aside className={`fixed bottom-5 right-5 z-40 ${visible ? "w-[min(390px,calc(100vw-2rem))]" : "w-auto"}`} aria-label="NOVA personal assistant">
-      {!visible ? <button onClick={() => { setVisible(true); setStatus("Listening"); startListening(); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className={`size-2 rounded-full ${listening ? "bg-emerald-400 nova-live-dot" : "bg-cyan-300"}`} />NOVA / {listening ? "listening" : "standby"}</button> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
+      {!visible ? <div className="flex items-center gap-2"><button onClick={() => { setVisible(true); setStatus("Listening"); startListening(true); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className={`size-2 rounded-full ${listening ? "bg-emerald-400 nova-live-dot" : "bg-cyan-300"}`} />NOVA / {listening ? "listening" : "standby"}</button>{!listening && <button onClick={() => startListening(true)} className="rounded-full border border-border bg-background/80 px-3 py-2 text-[10px] text-muted-foreground hover:text-foreground">Enable mic</button>}</div> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">NOVA / voice interface</p><p className="mt-1 text-sm font-medium">{listening ? "Listening continuously" : status}</p></div><button onClick={() => { setVisible(false); window.speechSynthesis?.cancel() }} className="text-xs text-muted-foreground hover:text-foreground">Standby</button></div>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground" aria-live="polite">{transcript}</p>
-        {(status === "Microphone permission needed" || status === "Voice unavailable") && <Button variant="outline" size="sm" className="mt-3" onClick={() => startListening()}>Retry microphone</Button>}
+        {(status === "Microphone permission needed" || status === "Voice unavailable") && <Button variant="outline" size="sm" className="mt-3" onClick={() => startListening(true)}>Retry microphone</Button>}
         <div className="mt-3 flex gap-2"><input aria-label="Ask NOVA" value={command} onChange={(event) => setCommand(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { route(command); setCommand("") } }} placeholder="Ask about Vinay's world..." className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs outline-none focus:border-cyan-400" /><Button size="sm" onClick={() => { route(command); setCommand("") }}>Ask</Button></div>
         <div className="mt-3 flex flex-wrap gap-2">{["Technical skills", "Achievements", "PAN-OS work", "Change to light theme"].map((item) => <button key={item} onClick={() => route(item)} className="rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground hover:border-cyan-400 hover:text-cyan-300">{item}</button>)}</div>
         <div className="mt-3 flex items-center justify-between"><button onClick={() => window.speechSynthesis?.cancel()} className="text-[10px] text-muted-foreground underline underline-offset-4">Stop response</button><button onClick={() => { continuousRef.current = false; recognitionRef.current?.stop(); setVisible(false); setStatus("Silent standby") }} className="text-[10px] text-muted-foreground underline underline-offset-4">Mute voice</button></div>
@@ -1347,7 +1423,6 @@ export default function Portfolio() {
         <ExperienceSection />
         <EducationSection />
         <AchievementsSection />
-        <BlogSection />
         <ContactSection />
       </main>
       <Footer />

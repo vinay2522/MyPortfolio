@@ -44,6 +44,12 @@
   pointer-events: none;
 }
 
+.dashboard-panel {
+  background: linear-gradient(135deg, hsl(var(--card) / 0.96), hsl(var(--background) / 0.7));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 18px 60px hsl(var(--background) / 0.28);
+}
+
 .nova-live-dot {
   box-shadow: 0 0 12px hsl(142 76% 45% / 0.8);
 }
