@@ -174,6 +174,25 @@ const projects = [
   },
 ]
 
+const projectNarrations: Record<string, { aliases: string[]; answer: string }> = {
+  "secured evidence chain blockchain": {
+    aliases: ["blockchain", "block chain", "evidence chain", "secured evidence", "ethereum", "solidity", "ipfs"],
+    answer: "The Secured Evidence Chain is a blockchain web app for securely storing and tracking digital evidence. It uses Ethereum and Solidity smart contracts for immutable audit logs, IPFS for distributed storage, and AES and RSA encryption to protect sensitive evidence.",
+  },
+  "ai-based ambulance dispatch": {
+    aliases: ["ambulance", "dispatch", "emergency", "ai ambulance", "ambulance project", "machine learning dispatch"],
+    answer: "The AI-Based Ambulance Dispatch system predicts emergency demand and improves ambulance allocation. It reduced dispatch delays by more than 60 percent through machine learning, real-time tracking, and a full-stack MERN application.",
+  },
+  "plant disease detection model": {
+    aliases: ["plant disease", "plant detection", "leaf disease", "crop disease", "tensorflow plant", "keras plant"],
+    answer: "The Plant Disease Detection Model uses a convolutional neural network built with TensorFlow and Keras to identify plant diseases from leaf images. Vinay integrated it with a Flask web interface so users can submit images and receive a practical prediction.",
+  },
+  "serverless url shortener": {
+    aliases: ["url shortener", "shortener", "short url", "aws url", "lambda url", "serverless"],
+    answer: "The Serverless URL Shortener is an AWS application using Lambda, API Gateway, S3, and DynamoDB. It generates unique short codes, stores the original URLs, and redirects users through a lightweight serverless architecture.",
+  },
+}
+
 const projectCategories = ["All", "Blockchain", "AI/ML", "Cloud"]
 
 const skills = {
@@ -634,7 +653,7 @@ function ProjectsSection() {
   const filteredProjects = activeFilter === "All" ? projects : projects.filter((p) => p.category === activeFilter)
 
   return (
-    <section id="projects" className="py-20 sm:py-32">
+    <section id="projects" className="dashboard-panel py-20 sm:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-12">
@@ -1222,6 +1241,27 @@ function NovaAssistant() {
       speak("Dark theme enabled.")
       return
     }
+    const projectMatch = Object.entries(projectNarrations).find(([, project]) => project.aliases.some((alias) => text.includes(alias)))
+    if (projectMatch) {
+      document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })
+      speak(projectMatch[1].answer)
+      return
+    }
+
+    const navigation = [
+      { words: ["profile", "profile picture", "home", "top", "introduction", "about vinay"], target: "#home", answer: "Opening Vinay's profile and introduction." },
+      { words: ["skills", "technical skills", "technologies", "tech stack", "programming"], target: "#skills", answer: "Opening Vinay's technical skills." },
+      { words: ["experience", "work experience", "career", "internship", "work history"], target: "#experience", answer: "Opening Vinay's work experience." },
+      { words: ["education", "degree", "college", "graduation", "cgpa"], target: "#education", answer: "Opening Vinay's education." },
+      { words: ["achievements", "awards", "hackathons", "certifications"], target: "#achievements", answer: "Opening Vinay's achievements and certifications." },
+      { words: ["contact", "email", "linkedin", "reach vinay", "get in touch"], target: "#contact", answer: "Opening Vinay's contact details." },
+      { words: ["projects", "portfolio projects", "work samples"], target: "#projects", answer: "Opening Vinay's project archive." },
+    ]
+    const navigationMatch = navigation
+      .map((item) => ({ item, score: item.words.reduce((score, word) => score + (text.includes(word) ? (word.includes(" ") ? 4 : 2) : 0), 0) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)[0]?.item
+
     const answers = [
       { words: ["technical skill", "skills", "technology", "tech stack", "programming"], target: "#skills", answer: "Vinay's technical toolkit spans Python, Java, JavaScript, TypeScript, React, Next.js, Node.js, Solidity, Ethereum, IPFS, AWS, Docker, Git, PostgreSQL, MongoDB, REST APIs, PAN-OS XML APIs, cybersecurity testing, machine learning, and secure automation." },
       { words: ["achievement", "achievements", "award", "hackathon"], target: "#achievements", answer: "Vinay's achievements include hackathon recognition, competitive programming milestones, research and project work, and certifications across cloud, security, and software engineering." },
@@ -1244,7 +1284,12 @@ function NovaAssistant() {
       if (text.includes("resume")) downloadResumePdf()
       return
     }
-    speak("I understand portfolio questions about Vinay's technical skills, projects, experience, PAN-OS automation, education, achievements, certifications, contact, resume, and themes. Please ask your question naturally.")
+    if (navigationMatch) {
+      document.querySelector(navigationMatch.target)?.scrollIntoView({ behavior: "smooth" })
+      speak(navigationMatch.answer)
+      return
+    }
+    speak("I can explain Vinay's individual projects, technical skills, work experience, education, achievements, certifications, contact details, resume, and themes. Try asking about the blockchain project, ambulance dispatch, plant disease model, or URL shortener.")
   }
 
   const startListening = async () => {
@@ -1301,9 +1346,11 @@ function NovaAssistant() {
   }
 
   useEffect(() => {
+    const handleCommand = (event: Event) => route((event as CustomEvent<string>).detail)
+    window.addEventListener("nova-command", handleCommand)
     continuousRef.current = true
     const timer = window.setTimeout(() => startListening(), 700)
-    return () => { continuousRef.current = false; window.clearTimeout(timer); recognitionRef.current?.stop(); window.speechSynthesis?.cancel() }
+    return () => { continuousRef.current = false; window.clearTimeout(timer); window.removeEventListener("nova-command", handleCommand); recognitionRef.current?.stop(); window.speechSynthesis?.cancel() }
   }, [])
 
   return (
@@ -1358,6 +1405,12 @@ export default function Portfolio() {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       <main>
+        <section className="command-rail border-b border-border bg-card/40">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">NOVA command rail</span>
+            {["Open profile", "Show projects", "Technical skills", "Work experience", "Contact Vinay"].map((command) => <button key={command} onClick={() => window.dispatchEvent(new CustomEvent("nova-command", { detail: command }))} className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-cyan-400/60 hover:text-cyan-300">{command}</button>)}
+          </div>
+        </section>
         <HeroSection />
         <ProjectsSection />
         <SkillsSection />
