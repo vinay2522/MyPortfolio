@@ -10,6 +10,7 @@ import {
   Sun,
   Moon,
   Github,
+  Linkedin,
   Mail,
   MapPin,
   ExternalLink,
@@ -341,7 +342,7 @@ function downloadResumePdf() {
 
     addText("VINAY NAIK V", 19, true, 3)
     addText("Software Engineer 1 | Cybersecurity Automation | Full-Stack Engineering", 10, false, 3)
-    addText("Bangalore, India | vinay.1si22cs201@gmail.com | github.com/vinay2522 | linkedin.com/in/vinay-naik-v", 9, false, 8)
+    addText("Bangalore, India | vinay.1si22cs201@gmail.com | github.com/vinay2522 | www.linkedin.com/in/vinay-naik-v-4aa303251", 9, false, 8)
     section("Professional Summary")
     addText("Software Engineer 1 focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Experienced with Python, PAN-OS XML APIs, firewall workflows, cybersecurity testing, cloud technologies, and full-stack development.", 9, false, 6)
     section("Technical Skills")
@@ -369,7 +370,7 @@ function downloadResumePdf() {
     section("Certifications")
     certifications.forEach((item) => bullet(`${item.name} - ${item.issuer}`))
     section("Relevant Links")
-    addText("GitHub: https://github.com/vinay2522 | LinkedIn: https://linkedin.com/in/vinay-naik-v", 9, false, 4)
+    addText("GitHub: https://github.com/vinay2522 | LinkedIn: https://www.linkedin.com/in/vinay-naik-v-4aa303251", 9, false, 4)
     pdf.save("Vinay Naik V Resume.pdf")
   })
 }
@@ -445,8 +446,7 @@ function Navigation() {
     { name: "Projects", href: "#projects" },
     { name: "Skills", href: "#skills" },
     { name: "Experience", href: "#experience" },
-    { name: "Blog", href: "#blog" },
-    { name: "Contact", href: "#contact" },
+      { name: "Contact", href: "#contact" },
   ]
 
   const scrollToSection = (href: string) => {
@@ -1128,6 +1128,21 @@ function ContactSection() {
                   </div>
                 </a>
 
+                <a
+                  href="https://www.linkedin.com/in/vinay-naik-v-4aa303251"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-4 rounded-lg bg-background hover:bg-muted transition-colors group"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                    <Linkedin className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">LinkedIn</p>
+                    <p className="font-medium text-sm group-hover:text-cyan-400 transition-colors">vinay-naik-v</p>
+                  </div>
+                </a>
+
                 <div className="flex items-center gap-4 p-4 rounded-lg bg-background">
                   <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                     <MapPin className="h-6 w-6 text-white" />
@@ -1158,9 +1173,11 @@ function NovaAssistant() {
   const restartingRef = useRef(false)
   const supportedRef = useRef(false)
   const statusRef = useRef("Silent standby")
+  const listeningRef = useRef(false)
 
   useEffect(() => { visibleRef.current = visible }, [visible])
   useEffect(() => { statusRef.current = status }, [status])
+  useEffect(() => { listeningRef.current = listening }, [listening])
 
   const speak = (text: string) => {
     setTranscript(text)
@@ -1231,7 +1248,7 @@ function NovaAssistant() {
   }
 
   const startListening = async () => {
-    if (restartingRef.current || !continuousRef.current || listening) return
+    if (restartingRef.current || !continuousRef.current || listeningRef.current) return
     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!Recognition) {
       supportedRef.current = false
@@ -1291,7 +1308,7 @@ function NovaAssistant() {
 
   return (
     <aside className={`fixed bottom-5 right-5 z-40 ${visible ? "w-[min(390px,calc(100vw-2rem))]" : "w-auto"}`} aria-label="NOVA personal assistant">
-      {!visible ? <button onClick={() => { setVisible(true); setStatus("Listening"); startListening(); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className={`size-2 rounded-full ${listening ? "bg-emerald-400 nova-live-dot" : "bg-cyan-300"}`} />NOVA / {listening ? "listening" : "standby"}</button> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
+      {!visible ? <div className="flex items-center gap-2"><button onClick={() => { setVisible(true); setStatus("Listening"); startListening(); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className={`size-2 rounded-full ${listening ? "bg-emerald-400 nova-live-dot" : "bg-cyan-300"}`} />NOVA / {listening ? "listening" : "standby"}</button>{!listening && <button onClick={() => startListening()} className="rounded-full border border-border bg-background/80 px-3 py-2 text-[10px] text-muted-foreground hover:text-foreground">Enable mic</button>}</div> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">NOVA / voice interface</p><p className="mt-1 text-sm font-medium">{listening ? "Listening continuously" : status}</p></div><button onClick={() => { setVisible(false); window.speechSynthesis?.cancel() }} className="text-xs text-muted-foreground hover:text-foreground">Standby</button></div>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground" aria-live="polite">{transcript}</p>
         {(status === "Microphone permission needed" || status === "Voice unavailable") && <Button variant="outline" size="sm" className="mt-3" onClick={() => startListening()}>Retry microphone</Button>}
@@ -1347,7 +1364,6 @@ export default function Portfolio() {
         <ExperienceSection />
         <EducationSection />
         <AchievementsSection />
-        <BlogSection />
         <ContactSection />
       </main>
       <Footer />
