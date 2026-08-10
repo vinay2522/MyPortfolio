@@ -1305,30 +1305,20 @@ function NovaAssistant() {
       return
     }
     supportedRef.current = true
-    if (!microphoneReadyRef.current) {
-      if (!fromUserGesture) {
-        setStatus("Click NOVA to enable microphone")
-        setTranscript("Your browser requires one click to grant microphone access. Click NOVA once, then voice commands will stay active.")
-        return
-      }
-      try {
-        if (navigator.mediaDevices?.getUserMedia) {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-          stream.getTracks().forEach((track) => track.stop())
-        }
-        microphoneReadyRef.current = true
-      } catch {
-        setStatus("Microphone permission needed")
-        setTranscript("Allow microphone access in your browser, then click NOVA again to start voice commands.")
-        return
-      }
+    if (!fromUserGesture && !microphoneReadyRef.current) {
+      setStatus("Click NOVA to enable microphone")
+      setTranscript("Click NOVA once to start voice recognition. After that, say your command naturally.")
+      return
     }
+    microphoneReadyRef.current = true
     const recognition = new Recognition()
     recognition.lang = "en-US"
     recognition.continuous = true
     recognition.interimResults = false
     recognition.maxAlternatives = 3
     recognition.onstart = () => { restartingRef.current = false; setListening(true); setStatus(visibleRef.current ? "Listening" : "Silent standby") }
+    recognition.onaudiostart = () => setStatus("Audio connected")
+    recognition.onspeechstart = () => setStatus("Hearing you")
     recognition.onresult = (event: any) => {
       const result = event.results[event.results.length - 1]
       const phrase = result?.[0]?.transcript?.trim() || ""
@@ -1340,8 +1330,14 @@ function NovaAssistant() {
     }
     recognition.onerror = (event: any) => {
       setListening(false)
-      if (event?.error === "not-allowed" || event?.error === "service-not-allowed") setStatus("Microphone permission needed")
-      else if (event?.error !== "aborted") setStatus("Reconnecting")
+      if (event?.error === "not-allowed" || event?.error === "service-not-allowed") {
+        microphoneReadyRef.current = false
+        setStatus("Microphone permission needed")
+        setTranscript("Microphone access was blocked. Click NOVA and choose Allow in the browser permission prompt.")
+      } else if (event?.error === "audio-capture") {
+        setStatus("No microphone detected")
+        setTranscript("NOVA cannot detect an audio input. Check your system microphone and click NOVA to retry.")
+      } else if (event?.error !== "aborted") setStatus("Reconnecting")
     }
     recognition.onend = () => {
       setListening(false)
