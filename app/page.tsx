@@ -180,15 +180,15 @@ const projectNarrations: Record<string, { aliases: string[]; answer: string }> =
     answer: "The Secured Evidence Chain is a blockchain web app for securely storing and tracking digital evidence. It uses Ethereum and Solidity smart contracts for immutable audit logs, IPFS for distributed storage, and AES and RSA encryption to protect sensitive evidence.",
   },
   "ai-based ambulance dispatch": {
-    aliases: ["ambulance", "dispatch", "emergency", "ai ambulance", "ambulance project", "machine learning dispatch"],
+    aliases: ["ambulance", "ambulance project", "ai ambulance", "ambulance dispatch", "dispatch", "emergency dispatch", "emergency", "machine learning dispatch", "ai based ambulance"],
     answer: "The AI-Based Ambulance Dispatch system predicts emergency demand and improves ambulance allocation. It reduced dispatch delays by more than 60 percent through machine learning, real-time tracking, and a full-stack MERN application.",
   },
   "plant disease detection model": {
-    aliases: ["plant disease", "plant detection", "leaf disease", "crop disease", "tensorflow plant", "keras plant"],
+    aliases: ["plant disease", "plant disease detection", "plant detection", "plant disease model", "plant model", "leaf disease", "crop disease", "tensorflow plant", "keras plant", "disease detection model", "plan disease"],
     answer: "The Plant Disease Detection Model uses a convolutional neural network built with TensorFlow and Keras to identify plant diseases from leaf images. Vinay integrated it with a Flask web interface so users can submit images and receive a practical prediction.",
   },
   "serverless url shortener": {
-    aliases: ["url shortener", "shortener", "short url", "aws url", "lambda url", "serverless"],
+    aliases: ["url shortener", "serverless url shortener", "serverless shortener", "shortener", "short url", "aws url", "lambda url", "serverless project", "aws project"],
     answer: "The Serverless URL Shortener is an AWS application using Lambda, API Gateway, S3, and DynamoDB. It generates unique short codes, stores the original URLs, and redirects users through a lightweight serverless architecture.",
   },
 }
@@ -1242,26 +1242,20 @@ function NovaAssistant() {
       speak("Dark theme enabled.")
       return
     }
-    const projectMatch = Object.entries(projectNarrations).find(([, project]) => project.aliases.some((alias) => text.includes(alias)))
-    if (projectMatch) {
-      document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })
-      speak(projectMatch[1].answer)
-      return
-    }
-
     const navigation = [
-      { words: ["profile", "profile picture", "home", "top", "introduction", "about vinay"], target: "#home", answer: "Opening Vinay's profile and introduction." },
-      { words: ["skills", "technical skills", "technologies", "tech stack", "programming"], target: "#skills", answer: "Opening Vinay's technical skills." },
-      { words: ["experience", "work experience", "career", "internship", "work history"], target: "#experience", answer: "Opening Vinay's work experience." },
-      { words: ["education", "degree", "college", "graduation", "cgpa"], target: "#education", answer: "Opening Vinay's education." },
-      { words: ["achievements", "awards", "hackathons", "certifications"], target: "#achievements", answer: "Opening Vinay's achievements and certifications." },
-      { words: ["contact", "email", "linkedin", "reach vinay", "get in touch"], target: "#contact", answer: "Opening Vinay's contact details." },
-      { words: ["projects", "portfolio projects", "work samples"], target: "#projects", answer: "Opening Vinay's project archive." },
+      { words: ["profile", "profile picture", "home", "top", "introduction", "about vinay"], target: "#home", answer: "Opening Vinay's profile and introduction. If you want to hear about him, ask: tell me about Vinay." },
+      { words: ["skills", "technical skills", "technologies", "tech stack", "programming"], target: "#skills", answer: "Opening Vinay's technical skills. If you want the details, ask: tell me about his technical skills." },
+      { words: ["experience", "work experience", "career", "internship", "work history"], target: "#experience", answer: "Opening Vinay's work experience. If you want the summary, ask: tell me about his experience." },
+      { words: ["education", "degree", "college", "graduation", "cgpa"], target: "#education", answer: "Opening Vinay's education. If you want the details, ask: tell me about his education." },
+      { words: ["achievements", "awards", "hackathons", "certifications"], target: "#achievements", answer: "Opening Vinay's achievements and certifications. If you want the details, ask: tell me about his achievements." },
+      { words: ["contact", "email", "linkedin", "reach vinay", "get in touch"], target: "#contact", answer: "Opening Vinay's contact details. If you want his links, ask: show me his contact details." },
+      { words: ["projects", "portfolio projects", "work samples"], target: "#projects", answer: "Opening Vinay's project archive. If you want one project narrated, ask: tell me about the ambulance project, plant disease model, URL shortener, or blockchain project." },
     ]
     const navigationMatch = navigation
       .map((item) => ({ item, score: item.words.reduce((score, word) => score + (text.includes(word) ? (word.includes(" ") ? 4 : 2) : 0), 0) }))
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)[0]?.item
+    const isNavigationCommand = /^(go|take|open|show me|navigate|scroll|jump|move|bring|head|visit|view)\\b|\\b(go to|navigate to|open the|show me the|take me to|scroll to)\\b/.test(text)
 
     const answers = [
       { words: ["technical skill", "skills", "technology", "tech stack", "programming"], target: "#skills", answer: "Vinay's technical toolkit spans Python, Java, JavaScript, TypeScript, React, Next.js, Node.js, Solidity, Ethereum, IPFS, AWS, Docker, Git, PostgreSQL, MongoDB, REST APIs, PAN-OS XML APIs, cybersecurity testing, machine learning, and secure automation." },
@@ -1275,10 +1269,24 @@ function NovaAssistant() {
       { words: ["who is vinay", "about vinay", "tell me about"], target: "#home", answer: "Vinay is a Software Engineer 1 focused on secure automation, enterprise infrastructure, API integration, and reliable software systems. Welcome to his technical world." },
     ]
     const normalized = text.replace(/[?!.,]/g, " ").replace(/\s+/g, " ").trim()
-  const match = answers
+    const projectMatch = Object.entries(projectNarrations)
+      .map(([name, project]) => ({ name, project, score: project.aliases.reduce((score, alias) => score + (normalized.includes(alias) ? (alias.includes(" ") ? 5 : 2) : 0), 0) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)[0]
+    if (projectMatch && !isNavigationCommand) {
+      document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })
+      speak(projectMatch.project.answer)
+      return
+    }
+    const match = answers
     .map((item) => ({ item, score: item.words.reduce((score, word) => score + (normalized.includes(word) ? (word.includes(" ") ? 4 : 2) : 0), 0) }))
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)[0]?.item
+    if (navigationMatch && isNavigationCommand) {
+      document.querySelector(navigationMatch.target)?.scrollIntoView({ behavior: "smooth" })
+      speak(navigationMatch.answer)
+      return
+    }
     if (match) {
       document.querySelector(match.target)?.scrollIntoView({ behavior: "smooth" })
       speak(match.answer)
