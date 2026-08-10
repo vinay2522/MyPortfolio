@@ -1193,6 +1193,7 @@ function NovaAssistant() {
   const supportedRef = useRef(false)
   const statusRef = useRef("Silent standby")
   const listeningRef = useRef(false)
+  const microphoneReadyRef = useRef(false)
 
   useEffect(() => { visibleRef.current = visible }, [visible])
   useEffect(() => { statusRef.current = status }, [status])
@@ -1292,7 +1293,8 @@ function NovaAssistant() {
     speak("I can explain Vinay's individual projects, technical skills, work experience, education, achievements, certifications, contact details, resume, and themes. Try asking about the blockchain project, ambulance dispatch, plant disease model, or URL shortener.")
   }
 
-  const startListening = async () => {
+  const startListening = async (fromUserGesture = false) => {
+    if (fromUserGesture) continuousRef.current = true
     if (restartingRef.current || !continuousRef.current || listeningRef.current) return
     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!Recognition) {
@@ -1303,15 +1305,23 @@ function NovaAssistant() {
       return
     }
     supportedRef.current = true
-    try {
-      if (navigator.mediaDevices?.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        stream.getTracks().forEach((track) => track.stop())
+    if (!microphoneReadyRef.current) {
+      if (!fromUserGesture) {
+        setStatus("Click NOVA to enable microphone")
+        setTranscript("Your browser requires one click to grant microphone access. Click NOVA once, then voice commands will stay active.")
+        return
       }
-    } catch {
-      setStatus("Microphone permission needed")
-      setTranscript("Allow microphone access in your browser, then use the retry control to enable continuous listening.")
-      return
+      try {
+        if (navigator.mediaDevices?.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+          stream.getTracks().forEach((track) => track.stop())
+        }
+        microphoneReadyRef.current = true
+      } catch {
+        setStatus("Microphone permission needed")
+        setTranscript("Allow microphone access in your browser, then click NOVA again to start voice commands.")
+        return
+      }
     }
     const recognition = new Recognition()
     recognition.lang = "en-US"
@@ -1346,19 +1356,17 @@ function NovaAssistant() {
   }
 
   useEffect(() => {
-    const handleCommand = (event: Event) => route((event as CustomEvent<string>).detail)
-    window.addEventListener("nova-command", handleCommand)
     continuousRef.current = true
     const timer = window.setTimeout(() => startListening(), 700)
-    return () => { continuousRef.current = false; window.clearTimeout(timer); window.removeEventListener("nova-command", handleCommand); recognitionRef.current?.stop(); window.speechSynthesis?.cancel() }
+    return () => { continuousRef.current = false; window.clearTimeout(timer); recognitionRef.current?.stop(); window.speechSynthesis?.cancel() }
   }, [])
 
   return (
     <aside className={`fixed bottom-5 right-5 z-40 ${visible ? "w-[min(390px,calc(100vw-2rem))]" : "w-auto"}`} aria-label="NOVA personal assistant">
-      {!visible ? <div className="flex items-center gap-2"><button onClick={() => { setVisible(true); setStatus("Listening"); startListening(); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className={`size-2 rounded-full ${listening ? "bg-emerald-400 nova-live-dot" : "bg-cyan-300"}`} />NOVA / {listening ? "listening" : "standby"}</button>{!listening && <button onClick={() => startListening()} className="rounded-full border border-border bg-background/80 px-3 py-2 text-[10px] text-muted-foreground hover:text-foreground">Enable mic</button>}</div> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
+      {!visible ? <div className="flex items-center gap-2"><button onClick={() => { setVisible(true); setStatus("Listening"); startListening(true); speak("NOVA online. How can I guide you through Vinay's World?") }} className="nova-signal group flex items-center gap-2 rounded-full border border-cyan-400/30 bg-background/80 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300 backdrop-blur" aria-label="Activate NOVA voice assistant"><span className={`size-2 rounded-full ${listening ? "bg-emerald-400 nova-live-dot" : "bg-cyan-300"}`} />NOVA / {listening ? "listening" : "standby"}</button>{!listening && <button onClick={() => startListening(true)} className="rounded-full border border-border bg-background/80 px-3 py-2 text-[10px] text-muted-foreground hover:text-foreground">Enable mic</button>}</div> : <div className="rounded-2xl border border-cyan-400/30 bg-background/90 p-4 shadow-[0_0_45px_hsl(var(--primary)/.18)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">NOVA / voice interface</p><p className="mt-1 text-sm font-medium">{listening ? "Listening continuously" : status}</p></div><button onClick={() => { setVisible(false); window.speechSynthesis?.cancel() }} className="text-xs text-muted-foreground hover:text-foreground">Standby</button></div>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground" aria-live="polite">{transcript}</p>
-        {(status === "Microphone permission needed" || status === "Voice unavailable") && <Button variant="outline" size="sm" className="mt-3" onClick={() => startListening()}>Retry microphone</Button>}
+        {(status === "Microphone permission needed" || status === "Voice unavailable") && <Button variant="outline" size="sm" className="mt-3" onClick={() => startListening(true)}>Retry microphone</Button>}
         <div className="mt-3 flex gap-2"><input aria-label="Ask NOVA" value={command} onChange={(event) => setCommand(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { route(command); setCommand("") } }} placeholder="Ask about Vinay's world..." className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs outline-none focus:border-cyan-400" /><Button size="sm" onClick={() => { route(command); setCommand("") }}>Ask</Button></div>
         <div className="mt-3 flex flex-wrap gap-2">{["Technical skills", "Achievements", "PAN-OS work", "Change to light theme"].map((item) => <button key={item} onClick={() => route(item)} className="rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground hover:border-cyan-400 hover:text-cyan-300">{item}</button>)}</div>
         <div className="mt-3 flex items-center justify-between"><button onClick={() => window.speechSynthesis?.cancel()} className="text-[10px] text-muted-foreground underline underline-offset-4">Stop response</button><button onClick={() => { continuousRef.current = false; recognitionRef.current?.stop(); setVisible(false); setStatus("Silent standby") }} className="text-[10px] text-muted-foreground underline underline-offset-4">Mute voice</button></div>
@@ -1405,12 +1413,6 @@ export default function Portfolio() {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       <main>
-        <section className="command-rail border-b border-border bg-card/40">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">NOVA command rail</span>
-            {["Open profile", "Show projects", "Technical skills", "Work experience", "Contact Vinay"].map((command) => <button key={command} onClick={() => window.dispatchEvent(new CustomEvent("nova-command", { detail: command }))} className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-cyan-400/60 hover:text-cyan-300">{command}</button>)}
-          </div>
-        </section>
         <HeroSection />
         <ProjectsSection />
         <SkillsSection />
